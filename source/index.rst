@@ -10,7 +10,11 @@ Welcome to WordPress on MicroK8s's documentation!
    :maxdepth: 2
    :caption: Contents:
 
-
+   00-introduction
+   01-what-will-be-used
+   02-why-containers
+   03-first-experiment
+   04-cloud-first-demo
 
 Indices and tables
 ==================
