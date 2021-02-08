@@ -1,3 +1,6 @@
+### Sphinx
+build/*
+
 ### VisualStudioCode ###
 .vscode/*
 !.vscode/tasks.json
