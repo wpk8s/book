@@ -17,7 +17,7 @@ namespace :book do
       date_string = Time.now.strftime("%Y-%m-%d")
       params = "--attribute revnumber='#{version_string}' --attribute revdate='#{date_string}'"
       puts "Generating contributors list"
-      `git shortlog -s | grep -v -E "(Madalin|dependabot)" | cut -f 2- | column -c 120 > book/contributors.txt`
+      `git shortlog -s | grep -v -E "(Madalin|Mădălin|dependabot)" | cut -f 2- | column -c 120 > book/contributors.txt`
 
       puts "Converting to HTML..."
       `bundle exec asciidoctor #{params} -a data-uri wpk8s.asc`
