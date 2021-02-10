@@ -1,0 +1,50 @@
+namespace :book do
+  def exec_or_raise(command)
+    puts `#{command}`
+    if (! $?.success?)
+      raise "'#{command}' failed"
+    end
+  end
+
+  desc 'build basic book formats'
+  task :build do
+
+    begin
+      version_string = ENV['TRAVIS_TAG'] || `git describe --tags`.chomp
+      if version_string.empty?
+        version_string = '0'
+      end
+      date_string = Time.now.strftime("%Y-%m-%d")
+      params = "--attribute revnumber='#{version_string}' --attribute revdate='#{date_string}'"
+      puts "Generating contributors list"
+      `git shortlog -s | grep -v -E "(Madalin|dependabot)" | cut -f 2- | column -c 120 > book/contributors.txt`
+
+      puts "Converting to HTML..."
+      `bundle exec asciidoctor #{params} -a data-uri wpk8s.asc`
+      puts " -- HTML output at wpk8s.html"
+
+      exec_or_raise('htmlproofer --check-html --disable-external wpk8s.html')
+
+      # puts "Converting to EPub..."
+      # `bundle exec asciidoctor-epub3 #{params} wpk8s.asc`
+      # puts " -- Epub output at wpk8s.epub"
+
+      # exec_or_raise('epubcheck wpk8s.epub')
+
+      # Commented out the .mobi file creation because the kindlegen dependency is not available.
+      # For more information on this see: #1496.
+      # This is a (hopefully) temporary fix until upstream asciidoctor-epub3 is fixed and we can offer .mobi files again.
+
+      # puts "Converting to Mobi (kf8)..."
+      # `bundle exec asciidoctor-epub3 #{params} -a ebook-format=kf8 wpk8s.asc`
+      # puts " -- Mobi output at wpk8s.mobi"
+
+      # puts "Converting to PDF... (this one takes a while)"
+      # `bundle exec asciidoctor-pdf #{params} wpk8s.asc 2>/dev/null`
+      # puts " -- PDF output at wpk8s.pdf"
+
+    end
+  end
+end
+
+task :default => "book:build"

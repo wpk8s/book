@@ -1,5 +1,6 @@
-### Sphinx
-build/*
+wpk8s.epub
+wpk8s.html
+wpk8s.pdf
 
 ### VisualStudioCode ###
 .vscode/*
