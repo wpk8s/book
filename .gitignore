@@ -2,6 +2,8 @@ wpk8s.epub
 wpk8s.html
 wpk8s.pdf
 
+book/contributors.txt
+
 ### VisualStudioCode ###
 .vscode/*
 !.vscode/tasks.json
