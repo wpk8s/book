@@ -1,0 +1,46 @@
+= WordPress on MicroK8s
+:author: Mădălin Ignișca
+:email: madalin@ignisca.email
+:doctype: book
+:docinfo:
+:toc:
+:toclevels: 2
+:pagenums:
+:front-cover-image: image:book/cover.png[width=2550,height=3300]
+:icons: font
+:source-highlighter: rouge
+:coderay-linenums-mode: inline
+
+include::book/license.adoc[]
+
+include::book/dedication.adoc[]
+
+include::book/about.adoc[]
+
+include::book/preface.adoc[]
+
+// include::book/contributors.txt[]
+
+include::book/introduction.adoc[]
+
+include::ch01-what-will-be-used.adoc[]
+
+include::ch02-why-containers.adoc[]
+
+include::ch03-first-experiment.adoc[]
+
+include::ch04-cloud-first-demo.adoc[]
+
+include::ch05-https.adoc[]
+
+include::ch06-services-versions.adoc[]
+
+include::ch07-high-availability.adoc[]
+
+include::ch08-backup-solutions.adoc[]
+
+include::ch09-locking-code-version.adoc[]
+
+include::ch10-monitor-observe-alerts.adoc[]
+
+// ifndef::ebook-format[include::index.adoc[]]

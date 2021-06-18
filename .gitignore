@@ -4,6 +4,8 @@ wpk8s.pdf
 
 book/contributors.txt
 
+vendor/*
+
 ### VisualStudioCode ###
 .vscode/*
 !.vscode/tasks.json

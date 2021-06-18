@@ -386,7 +386,7 @@ Change directory in it and run the following commands:
 You might spot an error in output like this, but as of Kubernetes nature
 of self healing, the manifests will be applied.
 
-image:images/cloudflare-deploy-manifests-output.png[Apply manifests possible error]
+image:images/cloudflare-deploy-manifests-output-error.png[Apply manifests possible error]
 
 IMPORTANT: Next part, a bit tricky, so make sure you are careful to use your exact
 CA API key as the example one is a fake one to provide the example.

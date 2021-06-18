@@ -384,4 +384,4 @@ Let's ROCK: `sudo microk8s.kubectl apply -k ./`. Like before, will take a few
 seconds, possible up to 1-2 minutes on a fresh cluster that needs to pull
 container images, and our website will be available.
 
-No load the website.
+Now load the website.

@@ -67,7 +67,7 @@ namespace :book do
       check_contrib()
 
       puts 'Converting to HTML...'
-      `bundle exec asciidoctor #{params} -a data-uri wpk8s.asc`
+      `bundle exec asciidoctor #{params} -a data-uri wpk8s.adoc`
       puts ' -- HTML output at wpk8s.html'
 
   end
@@ -77,7 +77,7 @@ namespace :book do
       check_contrib()
 
       puts 'Converting to EPub...'
-      `bundle exec asciidoctor-epub3 #{params} wpk8s.asc`
+      `bundle exec asciidoctor-epub3 #{params} wpk8s.adoc`
       puts ' -- Epub output at wpk8s.epub'
 
   end
@@ -89,7 +89,7 @@ namespace :book do
       # This is a (hopefully) temporary fix until upstream asciidoctor-epub3 is fixed and we can offer .mobi files again.
 
       # puts "Converting to Mobi (kf8)..."
-      # `bundle exec asciidoctor-epub3 #{params} -a ebook-format=kf8 wpk8s.asc`
+      # `bundle exec asciidoctor-epub3 #{params} -a ebook-format=kf8 wpk8s.adoc`
       # puts " -- Mobi output at wpk8s.mobi"
 
       # FIXME: If asciidoctor-epub3 supports Mobi again, uncomment these lines below
@@ -103,7 +103,7 @@ namespace :book do
       check_contrib()
 
       puts 'Converting to PDF... (this one takes a while)'
-      `bundle exec asciidoctor-pdf #{params} wpk8s.asc 2>/dev/null`
+      `bundle exec asciidoctor-pdf #{params} wpk8s.adoc 2>/dev/null`
       puts ' -- PDF output at wpk8s.pdf'
   end
 
