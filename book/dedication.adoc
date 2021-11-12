@@ -1,2 +1,2 @@
 [[dedication.asc]]
-_This book is dedicated to wife and children._
+_This book is dedicated to my wife and children._

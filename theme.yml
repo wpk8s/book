@@ -1,0 +1,25 @@
+extends: default
+font:
+  catalog:
+    Ubuntu:
+      normal: Ubuntu-R.ttf
+      italic: Ubuntu-RI.ttf
+      bold: Ubuntu-B.ttf
+      bold_italic: Ubuntu-BI.ttf
+    UbuntuMono:
+      normal: UbuntuMono-R.ttf
+      italic: UbuntuMono-RI.ttf
+      bold: UbuntuMono-B.ttf
+      bold_italic: UbuntuMono-BI.ttf
+
+base:
+  font-family: Ubuntu
+
+link:
+  font-color: #0066cc
+
+literal:
+  font-family: UbuntuMono
+
+code:
+  font-family: UbuntuMono

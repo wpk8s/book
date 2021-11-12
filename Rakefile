@@ -103,7 +103,7 @@ namespace :book do
       check_contrib()
 
       puts 'Converting to PDF... (this one takes a while)'
-      `bundle exec asciidoctor-pdf #{params} wpk8s.adoc 2>/dev/null`
+      `bundle exec asciidoctor-pdf -a pdf-theme=theme.yml -a pdf-fontsdir=fonts wpk8s.adoc`
       puts ' -- PDF output at wpk8s.pdf'
   end
 
