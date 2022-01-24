@@ -1,13 +1,12 @@
 [[ch01-what-will-be-used]]
 == Everything we are going to use
 
-In this chapter I'm going to introduce you to all the tools and online
+In this chapter I am going to introduce you to all the tools and online
 resources that will be used in this book, so you could go ahead and be
-able to make a comparison for the online services to be able to make
-later choices. I do not want to convince you for any specific one, I
-will demonstrate that same recipes can run with almost no modification
-in any of them, so what you will learn is portable, not vendor locked
-in.
+able to make a comparison for the online services and make informed
+choices later. I do not want to convince you for any specific one, I
+will demonstrate that the same recipes can run with almost no modification
+in any of them, so what you learn is portable, not vendor locked.
 
 === Tools
 
@@ -16,71 +15,71 @@ in.
 https://bit.ly/3pZ5yeP[**MicroK8s**] was initially designed to be used as
 a small quick Kubernetes cluster for local development. One of the core
 ideas of containers was immutability, so, what you are running locally,
-it will run also identical out there in production setup. It has evolved
+will run identically out there in the production setup. It has evolved
 to a production grade solution that can run single or multi-machine
 clusters, on x86-64 and arm64 platforms.
 
-I became a fan of MicroK8s at the moment I discovered I could experiment
-with it on a Raspberry Pi 4 I had and it simply impressed me that in a
+I became a fan of MicroK8s the moment I discovered that I could experiment
+with it on a Raspberry Pi 4 I had, and it simply impressed me that in a
 few minutes I had Kubernetes available and I could just start a WordPress
 experiment I was working on without any changes.
 
 ==== Terraform
 
 http://j.mp/3rQclIh[**Terraform**] is an Infrastructure management tool.
-Terraform helps us to manage public cloud infrastructure faster and much
-more reliable when the number of services increases. As an example, it
-can handle DNS in Cloudflare, virtual machines and load balancers in Hetzner,
-databases and cache instances in Digital Ocean, S3 compatible object storage
-in Linode and even manage a Kubernetes cluster.
+Terraform helps us to manage public cloud infrastructure faster and is much
+more reliable when the number of services increases. For example, it
+can handle DNS on Cloudflare, virtual machines and load balancers on Hetzner,
+databases and cache instances on Digital Ocean, S3 compatible object storage
+on Linode and even manage a Kubernetes cluster.
 
 ==== Vagrant
 
-http://j.mp/3rRnEjt[**Vagrant**] it's a command line tool that helps
-starting and managing local virtual machines quick, fast and headless
-(meaning it will not start a virtual screen of it, but much similar
-to what would be limited to ssh access like in real cloud). It can help
-you start from 1 to a lot of identical virtual servers locally in seconds.
+http://j.mp/3rRnEjt[**Vagrant**] is a command line tool that helps
+starting and managing local virtual machines quickly, fast and headless
+(meaning it will not start a virtual screen of it, but more similar
+to what you would be limited to ssh access on the real cloud). It can help
+you start 1 or multiple identical virtual servers locally in seconds.
 
 ==== VirtualBox
 
 http://j.mp/37fRk26[**Virtualbox**] is a virtualization solution that
 recently has been enhanced to work together with Hyper-V on Windows or
 KVM in Linux. Using it helps people, working on different operating
-systems, using same identical configuration when combined with Vagrant.
+systems, to use an identical configuration when combined with Vagrant.
 
 ==== Docker
 
 While http://j.mp/2NtQaZx[**Docker**] is an alternative to Kubernetes,
 it is much easier to use for local development and could be preferred
-sometimes in production. We will see how can it help us with WordPress
+at times in production. We will see how it can help us with WordPress
 development in a later chapter.
 
 ==== Visual Studio Code
 
 http://j.mp/2NqWSzu[**Visual Studio Code**] is one of the few code editors
-and light integrated development environment, capable of handling remote
+and light integrated development environments capable of handling remote
 or containerized projects. While all things in this book could be done with
-other code editors, especially all from command line, I will use it for the
-benefit of beginners to help them go faster learning.
+other code editors, especially everything from the command line, I will use it for the
+benefit of beginners to help them learn faster.
 
 === Cloud Providers
 
 ==== Hetzner
 
 I will use https://bit.ly/3cLf8hH[**Hetzner**] to exemplify things on
-real cloud servers. As using real online instances involves a cost, I chosen
-it as it is one of the cheapest, at the same time very reliable, public
-cloud providers. Although it does not offer many managed services compared
+real cloud servers. As using real online instances involves a cost, I have chosen
+one of the cheapest that is still very reliable as a public
+cloud provider. Although it does not offer many managed services compared
 to others, my goal in this book is to teach you how to do things without
-being locked on a public cloud vendor, to be able to move next day if such
-a decision must be taken.
+being locked into a public cloud vendor, to be able to move the very next day if such
+a decision need be taken.
 
 ==== Digital Ocean
 
 I will use http://j.mp/3b2Am8u[**Digital Ocean**] as the secondary public
-cloud provider to demonstrate migrating from first provider used to another
-one. In past decade I've worked occasionally on migration projects, that
+cloud provider to demonstrate migrating from your first provider used to another
+one. In the past decade I have occasionally worked on migration projects, where
 their main problem was some of the managed services used by the projects.
 In the migration chapter, we will learn how to handle migration of data by
 automation, with a scenario that can be replicated anytime.
@@ -89,7 +88,7 @@ automation, with a scenario that can be replicated anytime.
 
 ==== Cloudflare
 
-The benefits of https://bit.ly/3tyYl7B[**Cloudflare**] are a great addition
+The many benefits of https://bit.ly/3tyYl7B[**Cloudflare**] are a great addition
 over the public cloud. Centralized DNS management, http://j.mp/3jYSCDT[DDOS]
 protection, SSL certificates, caching, page rules and many more. We will
-explore and configure manually or using Terraform the most important them.
+explore and configure them manually or use Terraform for the most important of them.
