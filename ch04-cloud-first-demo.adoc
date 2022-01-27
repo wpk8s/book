@@ -2,51 +2,51 @@
 == Cloud - first demo
 
 In this chapter, we are going to try the same thing we did locally, but
-in the public cloud. We will cover single node, allowing to run MicroK8s
-with only it's official supported addons, and we will use from begining
-some configuration that will allow us to upgrade to multi-nodes in the
-feature.
+in the public cloud. We will cover single node, allowing us to run MicroK8s
+with only it's official supported addons, and we will use some configuration
+from begining that will allow us to upgrade to multiple nodes in the
+future.
 
-To ensure upgrade to multiple nodes will be possible, some things need
-to be thought and decided.
+To ensure an upgrade to multiple nodes will be possible, some things need
+to be considered and decided upon.
 
-Most of the online resources will point towards using Kubernetes
-multiple nodes on same network, that being set as in same VPC (Virtual
-Private Cloud) in Amazon AWS or other providers, to ensure you can use
-an internal private network and share easier certain resources, like
-networked file system, and focus to protect the cluster from one
+Most of the online resources will point towards using Kubernetes with
+multiple nodes on the same network, that are set in same VPC (Virtual
+Private Cloud) in Amazon AWS or any other provider, to ensure you can use
+an internal private network and easily share certain resources, like a
+networked file system, and focus on protecting the cluster with one
 internet single entry point.
 
 Let's create a private network in our project.
 
-But let's focus on the simple implementation, just one node, MicroK8s
+For now let's focus on the simple implementation, just one node, MicroK8s
 with it's official addons, and make sure it can be extended.
 
 I will be using https://j.mp/3cLf8hH[Hetzner] for my public cloud
-provider. Using them, will require to go through the process to validate
+provider. Using them, will require going through the process to validate
 your identity, as they are very strict on security and avoiding fraud.
-You should use any preferred public cloud although, and adapt to their
-dashboard, as things are mostly common between clouds. I personally
-choose Hetzner, as having great performance and security, while being
-the lowest in price, and suits my personal projects requirements saving me
+You can use any preferred public cloud though, and adapt according to their
+dashboard, as things are fairly common between clouds. I personally
+choose Hetzner, as they have great performance and security, while being
+lowest in price, and they suit my personal project requirements saving me
 a lot of money. I am not concerned about locations of servers, as on top
-I use Cloudflare which will ensure to deliver with lowest latency
+I use Cloudflare which will ensure delivery with lowest latency
 responses to the visitors - more in a later chapter about this and
 alternatives to Cloudflare.
 
 If you want to read some comparison done by https://j.mp/2YPYfua[Rasmus
-Lerdorf] on decent priced public cloud servers, it might help you in
-making a decision. I think he's be a better reference than me to
-influence you in your choice.
+Lerdorf] on reasonably priced public cloud servers, it may help you in
+reaching a decision. I think he is a better reference than I to
+influence your choice.
 
-Let's start with one basic cloud server, sized at 1 core and 2GB of ram
+Let's start with one basic cloud server, sized at 1 core and 2GB of RAM
 to experiment.
 
-Hetzner supports the separation of resources by naming them Projects.
-Either use the default one or, better, create a new dedicated one to
+Hetzner supports the separation of resources by naming them 'Projects'.
+Either use the default one or, preferably, create a new dedicated one to
 learn. Resources in one project are isolated from other projects.
 Projects also allow you to invite collaborators, and they will be
-limited at project level. A project can also be later transferred to a
+limited at the project level. A project can also be transferred later to a
 client.
 
 image:images/hetzner-create-project.png[Create project]
@@ -57,14 +57,14 @@ PROJECT*.
 image:images/hetzner-create-network.png[Create network]
 
 Next, on the left sidebar, click *Networks*, click *CREATE NETWORK*,
-name it for example `wpk8s`, and give it a range, like `172.16.0.0`.
-This would be full class B private network, Hetzner would create
+name it, for example `wpk8s`, and give it a range, like `172.16.0.0`.
+This will be a full class B private network, Hetzner creates
 sub networks inside of it, and that will give us 65534 auto assignable ip
 addresses that on any cloud server with this network attached will be
-pre configured if selected on creation, or configurable manually with a
-very simple how linked from the dashboard. As a note why I use class B
-networks, as it is less used in local networks. Also avoid `10.0.0.0/8`
-as it is used by default with Kubernetes.
+pre configured if selected on creation. Alternatively, they are configurable manually in a
+very simple way linked from the dashboard. As a note, the reason I use class B
+networks is becasue they are used less in local networks. Also try to avoid `10.0.0.0/8`
+as they are used by default with Kubernetes.
 
 image:images/create-ssh-key-win10.png[Create ssh key]
 
@@ -80,7 +80,7 @@ open *CMD* or *Windows Terminal* and type
 the _some-word-to-identify-this-computer_ with something representative
 for you. After a few *Enter* presses, when back on prompt, run
 `type .ssh\id_rsa.pub | clip`. This will copy the public version of the
-key in the clipboard, and you can paste it now in Hetzner's panel.
+key in the clipboard, and you can paste it now in Hetzner's ssh panel.
 
 On MacOS, open *Terminal* and run
 `ssh-keygen -b 4096 -C 'some-word-to-identify-this-computer'` replacing
@@ -91,11 +91,11 @@ for you. After a few *Enter* presses, when back on prompt, run
 In Linux, like on MacOS, to copy in the clipboard run
 `cat .ssh/id_rsa.pub` and select and copy with the mouse. An alternative
 to _clip_ and _pbcopy_ does not come by default with most distributions
-and simple there are a lot of them, and different between X11 and Wayland.
+and there are a lot of them, all different between X11 and Wayland.
 
 image:images/hetzner-add-ssh-publickey.png[Add the ssh public key]
 
-In the Hetzner's panel, in the sidebar, click *Security*, *ADD SSH KEY*,
+In the Hetzner panel, in the sidebar, click *Security*, *ADD SSH KEY*,
 paste the key, it's name will be prefilled with the comment name you
 used when generated, but you may change it to identify it easy here in
 the panel.
@@ -104,16 +104,16 @@ the panel.
 
 *Select a location*. For the future, using multiple locations is ideal
 for High Availability, something I will detail in different scenarios in
-the following chapters - worry free, no alarms at 3AM. I use servers in
+the following chapters - worry free, no alarms at 3AM. I use servers in the
 same location to do horizontal scaling and multiple locations to setup
-replications for high availability or disaster recovery, depends on how
+replications for high availability or disaster recovery, depends on what
 the clients choose.
 
 *Select Ubuntu 20.04 or latest LTS version*. Setup can be done on other
 distributions, but for simplicity, I will demo using Ubuntu.
 
-*Select Standard with Local storage type*. Possible to respond to why
-local and not *Network (CEPH)*, simply because IO (input/output)
+*Select Standard with Local storage type*. The reason why we choose
+local and not *Network (CEPH)*, is because IO (input/output)
 operations with the disk are close to native ssd/nvme on your local
 computer, and network is slow.
 
@@ -121,7 +121,7 @@ NOTE: When we will see how to do advanced setup for MariaDB (MySQL),
 you will understand the critical benefit achieved with local storage
 and how easy we can set either replication or backups to recover very
 quickly or automatically from disasters, achieving maximum performance in
-read/write operations, most costly for any application with database
+read/write operations, which is most costly for any application with database
 access. If performance with the database is not critical in your
 situation and you intend to use a single node only, network storage type
 could help you to allow Hetzner to recover in a few minutes from a
