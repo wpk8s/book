@@ -129,30 +129,30 @@ failure, as they move cloud servers to other hosts in the datacenter,
 and the volumes are already accessible from network, also being triple
 replicated and highly available for any situation.
 
-*Select CX11*. When you will select for production and large setups,
+*Select CX11*. When you select for production and large setups,
 please note that switching between _CX?_ and _CXP?_ cloud servers is not
-possible, even with network storage (possible will change in the future
-for network storage type). I'm choosing _CX?_ (Intel) types in general,
-but _CXP?_ (AMD) types work well for having higher cpu cores ratio
-towards memory; _CXP?_ is good candidate to isolate php workers and web
-servers and _CX?_ preferred for database or cache services for more ram.
-Benefit of choosing is financial balance in the end.
+possible, even with network storage (maybe this will change in the future
+for network storage type). I am choosing _CX?_ (Intel) types in general,
+but _CXP?_ (AMD) types work well for having higher cpu cores ratioed
+towards memory; _CXP?_ is a good candidate to isolate php workers and web
+servers and _CX?_ is preferred for database or cache services for more ram.
+In the end, the choice is based on finding financial balance.
 
-Also a strong note, which applies to any public cloud, not Hetzner only,
-*Standard* or *Shared* (how Digital Ocean names) instance types are not
-intended for long continuous processing, so I strongly advise you to
+Also a strong note, which applies to any public cloud, not only Hetzner,
+*Standard* or *Shared* (Digital Ocean nomenclature) instance types are not
+intended for long continuous processing, so I strongly advise that you
 avoid using them for continuous processing like video conversion,
 optimizing images. If this is done occasionally within processes of a
-few minutes, it is fine, but having them for hours, it's breaking the
-terms and conditions of usage in all public clouds. For this kind of
+few minutes, it is fine, but having them for hours, often breaks the
+terms and conditions of usage in public clouds. For this kind of
 almost non-stop processing, use *Dedicated* types.
 
 *Select the network we created*. This will automatically setup the
-private network in the cloud server and doing this even for a single
+private network in the cloud server and doing this, even for a single
 node, will help you for future expansion.
 
 Click on user data and type or copy/paste the following, changing the
-user if you wish so:
+user if you wish to:
 
 .https://j.mp/3p08OW2[Gist link]
 [source,shell,linenums]
@@ -185,24 +185,24 @@ _original source: https://j.mp/3pHxfZt[Digital Ocean]_
 Select the SSH key you added.
 
 Give it a *fully qualified domain name* as name. I'll be using
-`vm1.hel1.wp.k8s`. Make sure you will use a proper
+`vm1.hel1.wp.k8s`. Make sure you use a proper
 *https://en.wikipedia.org/wiki/Fully_qualified_domain_name[fqdn]*, as
 this is important when you expand to multi-nodes. The domain name does
-not need to be a real registered one. I use domains with DNS that does
-not exists, to avoid dns issues in case somebody registers it.
+not need to be a real registered one. I use domains with a DNS that does
+not exist, to avoid dns issues in the case of somebody else registering it.
 
 Hit the Create button and wait a few seconds, usually 15-30 seconds, and
-you can copy the server's ip, just a click on it is necessary and back
-in your terminal ssh into it, example: `ssh wpk8s@135.181.93.201`. It
-will ask first time to give it a password. Type a decent strong
-password, hit enter, you will need to confirm it, and will exit. Now hit
-up key again and ssh again in it. It will login without asking for the
+you can copy the server's ip, just clicking on it is necessary and back
+in your terminal ssh into it, for example: `ssh wpk8s@135.181.93.201`. It
+will ask the first time for a password. Type a decent strong
+password, hit enter, you will need to confirm it, and the it will exit. Now hit
+up key again and ssh back into it. It should login without asking for the
 password.
 
 From now on, the password will be required only when we run commands
-using `sudo` or if you'll need to ssh in from another device.
+using `sudo` or if you need to ssh in from another device.
 
-Next we can do exactly the same scenario we did in the local experiment
+Next we can repeat the same scenario we had in the local experiment
 from the previous chapter, except that we need to install *snap* to be
 able to install MicroK8s. The following first commands should be run
 anyway in an online environment.
