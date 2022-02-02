@@ -2,49 +2,49 @@
 == HTTPS
 
 HTTPS is mandatory today for a website. It can work without, but to have a
-website, an online service online, serving visitors from everywhere, HTTPS
-is mandatory to offer them a guarantee that data traveled between their
+website, an online service, serving visitors from everywhere, HTTPS
+is essential to offer them a guarantee that data traveled between their
 device and your website is encrypted and no middleman will be able to capture
-sensitive personal data they might share with you.
+the sensitive personal data they might share with you.
 
-I'll give you a basic example, related to common WordPress usage. You might
-host online a popular local news website that allows visitors to comment on
-the published articles. Your comment form is asking for a name and an email,
+I'll give you a basic example related to common WordPress usage. Lets say you
+host a popular local news website that allows visitors to comment on
+the published articles. Your comment form asks for a name and an email,
 besides the comment body. The website is served without a secure certificate.
 In the region, there's public WiFi access in all main areas, and most of
-the local people have been connecting to this networks without too much
-worries. Your website and the public WiFi is trusted by the local communities
-of people. But recently, nobody knew, because of poor security of the WiFi
-public network, a hacker managed to infiltrate some service, capturing all
+the local people have been connecting to this network without too much
+worry. Your website and the public WiFi is trusted by the local community.
+But recently, although nobody knew, due to poor security of the public
+WiFi network, a hacker managed to infiltrate some service, capturing all
 insecure data traffic, between clients and the target service. In this case,
-your website. So, the hacker is easily collecting all names, emails, easy
-associated and sells them to some evil intended organization. What's even
-worse, he can even rewrite parts of the responses, to change the truth of
+your website. So, the hacker can easily collect all names, emails, and all
+associated to sell them to some organization with evil intentions. Worse
+still, he can even rewrite parts of the responses, and change the truth of
 some articles.
 
-OK, it might sound a bit harsh the previous paragraph, but it is a totally
-possible scenario, and even more critical can happen. We use WordPress to
-create websites for medical centers, for kindergartens, news services, etc.
-It is mandatory to make our website or service to use http://j.mp/3b8zE9D[HTTPS].
+OK, the previous paragraph might sound a bit harsh, but it is an entirely
+possible scenario. It would be even worse where critical personal information is concerned.
+We use WordPress to create websites for medical centers, for kindergartens, news services, etc.
+It is absolutely necessary to make our website or service use http://j.mp/3b8zE9D[HTTPS].
 
-To make an example for this, I will prepare the following scenarios using
-subdomains of real domains I own, as this is the most common scenario I am
-sure the readers of this book intend to use, and to be able to fully
+To demonstrate this, I will prepare the following scenarios using
+subdomains of real domains that I own, as this is the most common scenario I
+believe the readers of this book would intend on using. To be able to fully
 understand this, you should practice it with at least one real domain. If
-you don't have any, you could buy a domain to use for personal portfolio,
-blog, email etc.
+you don't have any, you could buy a domain to use for a personal portfolio,
+blog or email etc.
 
-Before we dive in setting up secure servers, one thing to note is, this layer
+Before we dive into setting up secure servers, one thing to note is this layer
 of the service involves additional cpu usage, not too much if the traffic is
-low on a website, but on a heavy traffic WooCommerce website, on a Black Friday
-event, would be easier to measure how much it's affecting. So, we will cover
-solutions starting from simple to advanced.
+low on a website, but on a heavy traffic WooCommerce website, during a Black Friday
+event, it would be easier to measure what effect it is having. So, we will cover
+solutions starting with the most simple and then move to advanced.
 
-Let's create a **healtcheck** service very light, that you could use it in
-your clusters simply to provide some endpoints for doing a basic healthcheck
+Let's create a very light **healtcheck** service, that you could use in
+your clusters in order to provide some endpoints for doing a basic healthcheck
 for an Ingress entry.
 
-In any directory you consider, for example `healthcheck`, create:
+Create a directory of your choice, for example `healthcheck`, and add:
 
 .healthcheck-service.yml
 [source,yaml,linenums]
@@ -87,26 +87,26 @@ spec:
 
 === cert-manager
 
-With almost any way of setting up https and using digital x509 certificates, we
+With almost every method of setting up https and using digital x509 certificates, we
 need a way to handle them. Meet https://cert-manager.io[**cert-manager**].
 
-What it does, exactly as it's name suggests, it is a tool to manage certificates
-in a kubernetes cluster. Short, for this book, I will focus on how it can handle
+What it does, exactly as it's name suggests, is manage certificates
+in a kubernetes cluster. Shortly in this book, I will focus on how it handles
 Let's encrypt and Cloudflare edge.
 
-To install cert-manager, all we need to do it to run one command. First, please
+To install cert-manager, all we need to do is run one command. First, please
 open https://github.com/jetstack/cert-manager/tags[cert-manager tags] on
-Github, and check for the most high release tag version possible. As I write the
+Github, and check for the most high release tag version possible. At the time of writting this
 book, it's 1.2.0. Now, run, replacing the version if necessary:
 `microk8s.kubectl apply -f https://github.com/jetstack/cert-manager/releases/download/v1.2.0/cert-manager.yaml`
 
 In about a minute or two, it should finish applying minimal configuration and
-start required services it needs. We have not yet spent time on RBAC, but if have
+start the required services it needs. We have not yet spent time on RBAC, but if you have
 enabled it in the cluster, do be aware it needs extra setup that we will cover
-later in the book, not needed at current level yet.
+later in the book, however it is not needed at this current level.
 
-Next, we will cover three cases: ACME / Let's encrypt, CA issuer, possible useful
-for remote testing clusters, and external Cloudflare Origin CA.
+Next, we will cover three cases: ACME / Let's encrypt, CA issuer (possibly useful
+for remote testing clusters) and external Cloudflare Origin CA.
 
 === Let's encrypt
 
