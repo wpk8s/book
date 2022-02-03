@@ -111,23 +111,23 @@ for remote testing clusters) and external Cloudflare Origin CA.
 === Let's encrypt
 
 Let's encrypt needs to verify and validate the ownership of the domain or
-subdomain that the certificate is intended to be used. Without this, a certificate
-can't be issued. The easy way, is HTTP01 and the possible complicated one
-is DNS01, but needed for wildcard certificates.
+subdomain that the certificate is intended to be used with. Without this, a certificate
+can't be issued. The easy way is HTTP01 and the more complicated one
+is DNS01, but the latter is needed for wildcard certificates.
 
-Let's start with the HTTP01, simplest to setup and possible most used.
+Let's start with the HTTP01, easiest to setup and most widely used.
 
-We need to setup a cert-manager Issuer that will handle automatically
+We need to setup a cert-manager Issuer that will automatically handle
 creation and renewals of certificates. Let's encrypt has a staging and a
-production mode, and I do recommend setting up both, as if you need to
-test before production, staging is very relaxed over api calls. Forcing
-directly production while something was not done right, might cause reaching
-failed validation limit of 5 per hour on a host. Trying first staging will
-make you sure production should not fail. Read more if necessary
-https://letsencrypt.org/docs/rate-limits/[here].
+production mode, and I would recommend setting up both, in case you need to
+test before production, staging is very relaxed over api calls. Forcibly
+going to production while something is not configured right, might cause it to reach it's
+failed validation limit of 5 per hour on a host. Trying staging first will
+ive you assurance that production will not fail. Read more https://letsencrypt.org/docs/rate-limits/[here]
+if necessary.
 
 Next, let's create the Staging Issuer. Make a folder named `cert-manager`.
-Create `acme-staging-issuer.yml` file and paste the following, making sure
+Create an `acme-staging-issuer.yml` file and paste the following, making sure
 you replace the **email** key value with a real one you have access to.
 It's important as any issues related to the certificate will be sent
 to this email address.
@@ -230,10 +230,10 @@ We can monitor generation of the certificate by running:
 The status is in the `Ready` column and once ok, should be `True`.
 
 To inspect the certificate run:
-`microk8s.kubectl describe certificate wpk8s-club-demo-tls`, replacing with
+`microk8s.kubectl describe certificate wpk8s-club-demo-tls`, replacing "wpk8s-club-demo-tls" with
 the name you gave for the certificate.
 
-If it worked, let's make it for production.
+If it worked, let's make it ready for production.
 
 Edit the `wordpress-statefulset.yml` and change `letsencrypt-staging` to
 `letsencrypt-prod`.
@@ -311,59 +311,59 @@ for my website and I added the entry also to the tls spec, letting
 cert-manager know it needs to add it to the SAN entry of the certificate.
 
 Understanding certificates needs a long good chapter, and today's
-standards are slightly different than what were many years ago and some
+standards are slightly different from what they were many years ago and some
 classic usage of paid certificates might not be compliant with what
-modern browsers like Microsoft Edge, Google Chrome and Firefox are preferring.
+modern browsers like Microsoft Edge, Google Chrome and Firefox prefer.
 
 What we have managed above, is the basics of modern free certificates with
 Let's encrypt, and we will come back to the topic when you want to cover
-extra SAN (Subject Alternate Name), when we will see how to manage a common
+extra SAN (Subject Alternate Name), when we see how to manage a common
 certificate for WordPress Multi-Sites installation.
 
-NOTE: Wildcard Let's Encrypt certificates must be done different, and requires
+NOTE: Wildcard Let's Encrypt certificates must be done differently, and require
 a more complex setup. I will detail this in a dedicated chapter later, to keep
-to simple things first.
+things simple at first.
 
 === Cloudflare
 
 This setup involves Cloudflare to provide
 public facing certificate for visitors and private certificate for communication
-between Cloudflare network and our infrastructure. Other alternatives to Cloudflare
-should provide identical result.
+between Cloudflare network and our infrastructure. Alternatives to Cloudflare
+should provide an identical result.
 
 IMPORTANT: If you are going to use services like Cloudflare, I strongly recommend
-you do read for any component used from it to research careful it's pricing
-model. Cloudflare starts from free, and can cover all essential needs of a
-WordPress website, including DNS, DDOS protection, Cache, Firewall on the free
-level offered, but each of them, and all the extra comes with small prices which
-increases depending on different aspects.
+that you read up on any component used from it tand research it's pricing
+model carefully. Cloudflare starts from free, and can cover all the essential needs of a
+WordPress website, including DNS, DDOS protection, Cache and Firewall on the free
+level offered, but each of them, and all the extras come with small prices which can
+increase depending on different aspects.
 
 image:images/cloudflare-full-strict.png[Ideal encryption using Cloudflare]
 
-What we see in the screenshot above is the browser communicates securely with
+What we see in the screenshot above is the browser communicating securely with
 Cloudflare, which communicates securely with our server. You should research
-for a deep dive in the topic using
-http://j.mp/37jBl2P[their official support pages] at the moment
-you want to understand the technical aspects of how it works. I will guide
-you step by step how to implement this.
+for a deep dive into the topic using
+http://j.mp/37jBl2P[their official support pages], though at the moment
+you only want to understand the technical aspects of how it works. I will guide
+you step by step on how to implement this.
 
-First, if you do not have a Cloudflare account, proceed and create one. The
-registration does not involve any spending and it's a few minutes process.
-If you do not intend yet to do it, it's fine, read along or feel free to jump
+First, if you do not have a Cloudflare account, proceed to create one. The
+registration does not involve any spending and it's a process of only a few minutes.
+If you do not want to do it yet, it's fine, read along or feel free to jump
 to the alternative fully managing on your own digital certificates, I will
-provide minimal security tips along the book enough to help.
+provide minimal security tips throughout the book which should be enough to help.
 
 Cloudflare requires that the domain name will use them as DNS, so you will have to go
 through their process of switching the DNS nameservers for your domain to them. The
 process is easy, and will copy all current DNS records to make sure it will not break
 any already setup email records, anti spam records and others you might already have.
 Make sure to review all discovered records, and once you do transfer the nameservers,
-there might be a few minutes to a few hours of waiting period to be fulfilled.
-Cloudflare will offer you a status change if you recheck the page anytime you want.
+there might be a few minutes to a few hours of a waiting period to be fulfilled.
+Cloudflare will offer you a status change if you go back to check the page anytime you want.
 
 IMPORTANT: Keep Origin CA certificates configuration separate from a
-website's kubernetes configuration; will detail verbose in structuring
-configuration in files and directories. To fully benefit of Cloudflare's
+website's kubernetes configuration; it will detail the structuring
+configuration in files and directories verbosely. To fully benefit from Cloudflare's
 total protection, the **SSL/TLS encryption mode** must be set to
 **Full (strict)**. Remember, that this affects all possible subdomains
 proxied through Cloudflare!
@@ -377,21 +377,21 @@ https://github.com/cloudflare/origin-ca-issuer.git[Origin CA issuer]
 repo or on https://github.com/cloudflare/origin-ca-issuer/releases[Releases]
 page download the latest zip, and unzip it in the `cloudflare` directory.
 
-Change directory in it and run the following commands:
+Change directory into it and run the following commands:
 
 `microk8s.kubectl apply -f deploy/crds`
 
 `kubectl apply -f deploy/manifests`
 
-You might spot an error in output like this, but as of Kubernetes nature
+You might spot an error in output like this, but due to Kubernetes nature
 of self healing, the manifests will be applied.
 
 image:images/cloudflare-deploy-manifests-output-error.png[Apply manifests possible error]
 
-IMPORTANT: Next part, a bit tricky, so make sure you are careful to use your exact
-CA API key as the example one is a fake one to provide the example.
+IMPORTANT: For the next part,  it is a bit tricky, so make sure you are careful to use your exact
+CA API key as the example one is only a fake one to provide the example.
 
-Change one directory above, should be now in `cloudflare`.
+Change directory one level up, should now be in `cloudflare`.
 
 [source,bash]
 ----
@@ -425,17 +425,17 @@ Let's apply the configuration:
 
 `microk8s.kubectl apply -f origin-issuer.yml`
 
-What did we just did? We have created our Cloudflare Origin CA issuer
-which will be used to ask Cloudflare to prepare if doesn't exists
+What did we just do? We have created our Cloudflare Origin CA issuer
+which will be used to ask Cloudflare to prepare, if it doesn't exist,
 an origin certificate, and schedule it's refresh as needed.
 
 We can create common origin certificates for handling all subdomains
 of one domain and reuse in Ingress configurations or, on Ingress
-configuration we can do isolated definition for being explicit on
+configuration we can do isolated definitions to be explicit on
 using a dedicated origin certificate for a specific subdomain.
 
-The second version it's preferred for best security, as Cloudflare
-is not limiting you in how many origin certificates are handled.
+The second version is preferred for best security, as Cloudflare
+does not limit how many origin certificates are handled.
 
 Cloudflare offers an additional security enhancement:
 **Authenticated Origin Pulls**. The following is the explanation from
