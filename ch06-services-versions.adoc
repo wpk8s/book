@@ -1,24 +1,24 @@
 [[ch06-services-versions]]
 == Services versions
 
-I'm really glad you've made it until now. We still have a few steps to
+I'm really glad you've made it this far. We still have a few steps until we
 achieve a basic production grade concept to deploy WordPress.
 
-In this chapter we are going to detail about versions of services used,
-that is for WordPress and MariaDB containers.
+In this chapter we are going into the details of versions of services used,
+that are ideal for WordPress and MariaDB containers.
 
-MicroK8s is a Kubernetes distribution intended to self upgrade, and as
-long as external addons are used at minimum, maintenance over it is
+MicroK8s is a Kubernetes distribution intended to self upgrade, and so
+long as external addons are kept to a minimum, maintenance of it is
 minimal.
 
-It's normal we must take care of the operating system updates, and I will
-give you some tricks for automating upgrades and schedule safe restarts if
+Normally we must take care of the operating system updates, and I will
+show you some tricks for automating upgrades and scheduling safe restarts if
 needed.
 
-Our discussed extra addon until now, **cert-manager**, it's upgrade can be
-done, by applying the main remote configuration on each new tag, and to be
-aware of that, we can use different ways, like subscribing in Github to
-be notified by each new release of the project.
+Our discussed extra addon until now, **cert-manager**, can be upgraded,
+by applying the main remote configuration on each new tag, and there are a
+number of ways to stay up to date on tags, like subscribing on Github to
+be notified of each new release of the project.
 
 image:images/how-to-subscribe-to-release-notifications.png[How to subscribe to release notifications]
 
@@ -26,8 +26,8 @@ But let's start with our **WordPress** services management.
 
 === Locking container versions
 
-I'll bring back again the full recipe of a WordPress website
-and we will *talk* on every important part of it.
+I'll bring back the full recipe of a WordPress website
+and we will *talk* about each important part of it.
 
 .https://j.mp/3q0UdLp[kustomization.yml]
 [source,yaml,linenums]
@@ -48,27 +48,27 @@ resources:
 This is our start, our Kustomization file.
 
 We don't have any mention about a service version in it, but there is one critical
-thing. **We stored a clear text password in it!** We must not do this ever for
-production, public facing websites. It was simply easy to exemplify for a
-private experiment short lived that should be removed!
+thing. **We stored a clear text password in it!** We must not ever do this for
+production with public facing websites. It was simply easy to use as an example for a
+private experiment briefly that should be removed afterwards!
 
-What would be best practices to handle secrets for our websites? There are lots
-of options and opinions on how to do this. I take an easy approach.
+What would be best practice when handling secrets for our websites? There are lots
+of options and opinions on how to do this. Personally, I take an easy approach.
 
 I use a passwords application to save them. I use https://keepass.info[KeePass]
-and any similar solution, cloud based also should be fine.
+and any similar, cloud based solution should be fine also.
 
-Once I'm creating a new strong password, save it organized well, in case of
-KeePass, I use a dedicated database file for projects, I'm creating using
-`kubectl` the secret with the password.
+Once I've created a new strong password, I'll save it in an organized fashion. In the case of
+KeePass, I use a dedicated database file for projects, so I create the secret with the password
+using `kubectl`.
 
-Let's create a configuration template and a bash script to automate creation
+Let's create a configuration template and a bash script to automate the creation
 and update of a secret. You will be able to reuse this anytime you
 want to create a new secret or update an existing one. Make a new directory
-to store this files.
+to store these files.
 
 We will also extend our secret to set a custom user name and password for best
-security practices, avoiding using root user to connect to the database.
+security practices, and avoid using root user to connect to the database.
 
 .safe-password-manager.yml.tmpl
 [source,yaml,linenums]
@@ -197,8 +197,8 @@ https://kubernetes.io/docs/concepts/workloads/controllers/[**Workload Resources*
 which include the above **StatefulSet** used by me. Running MariaDB or any other
 database, requires that each instance has a particular configuration if
 high availability is desired for databases, and the storage is dedicated to
-one single instance running. On the opposite side, is the **ReplicaSet**, preferred
-to be configured using **Deployments** and is intended to be used in configurations
+one single instance running. On the opposite side, is the **ReplicaSet**, which prefer
+to be configured using **Deployments** and are intended to be used in configurations
 where multiple replicas need to be started. We will detail them in the next chapter,
 **High Availability**, which requires us to move from classic WordPress usage, that
 allows Core, Plugins, Themes, and uploads usage on a volume, towards ReplicaSets,
