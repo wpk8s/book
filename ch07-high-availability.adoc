@@ -3,66 +3,66 @@
 
 For me, high availability simply means that if part of the infrastructure
 fails, the websites still run without problems for visitors, and the only
-problem is for me to heal the infrastructure. Ideally, the infrastructure
-should self-heal and auto-scale, a more advanced topic, later discussed.
+problem is for me to fix the infrastructure. Ideally, the infrastructure
+should self-heal and auto-scale, a more advanced topicto be discussed later.
 
 MicroK8s starts by default with HA enabled, and starts acting as a real
-high available cluster, the minute you add 2 or more extra nodes in the
+highly available cluster the moment you add 2 or more extra nodes in the
 cluster, as the setup is 3 minimal nodes.
 
 The missing part of default, which might not be needed for some cases, but
-mandatory for a WordPress intended cluster, is High Available Storage.
+mandatory for a WordPress intended cluster, is Highly Available Storage.
 
-=== Local storage vs high available storage
+=== Local storage vs highly available storage
 
 MicroK8s comes with two alternative storage solution addons, at one step
 distance to use any of it.
 
-The one that existed since beginning of the project, LOCAL, allowed
-containers to use volumes strictly if they run in the same host.
+The one that existed since the beginning of the project, LOCAL, allowed
+containers to use volumes strictly if they run on the same host.
 
-That has been a blocker for high availability, as if that specific node
-crushes, than data would not be available easy to continue running on
+That has been a blocker to high availability, because if that specific node
+crashes, then data would not be readily available to continue running on
 other healthy nodes in the cluster.
 
-Since version 1.21, MicroK8s has https://openebs.io/[OpenEBS] as storage
-addon, and on any high available cluster with persistent data requirements
+Since version 1.21, MicroK8s has https://openebs.io/[OpenEBS] as a storage
+addon, and on any high availablity cluster with persistent data requirements
 this must be your default choice, unless you already know how to handle
 alternative solutions.
 
-By alternative solutions, I would look into using the public clouds volume
-attachment support in Kubernetes, but for me, it breaks the concept of
-being _public cloud vendor free_, although, with some effort, it could be
-done. But involves extra time in research, maintenance and so on. Also, will
+For alternative solutions, I would look into using the public clouds volume
+attachment support in Kubernetes, but for me that would go against the concept of
+being _public cloud vendor free_, although with some effort, it could be
+done. But it would involve extra research, maintenance and so on. Also, it would
 not allow horizontal scaling of WordPress, something that will be easy to do
 in the near feature using OpenEBS, when
 https://github.com/openebs/dynamic-nfs-provisioner[Dynamic NFS provisioner]
-will be stable and added also by default.
+is stable and is added by default.
 
 === Introducing OpenEBS
 
-For High Available storage, OpenEBS on MicroK8s will be the fastest with
-minimal maintenance effort you could benefit.
+For High Availablity storage, OpenEBS on MicroK8s will be the fastest with
+ the benefit of minimal maintenance effort.
 
 The addon comes with two storage classes, and I want you to remember one
-thing: **openebs-jiva-default** is your only choice you need to use to
+thing: **openebs-jiva-default** is the only thing you need to use to
 have self healing containers that can move from node to node without
-loosing everything when a node crushes.
+loosing everything when a node crashes.
 
-It comes with a minimal resource requirement although: minimum 3 nodes in the
-cluster. Well, that is also the specification of MicroK8s High Available
-cluster. The addon is pre-configured to replicate the volumes on minimal 3
+It does, however, come with a minimal resource requirement: a minimum of 3 nodes in the
+cluster. Well, that is also the specification of MicroK8s High Availablity
+cluster. The addon is pre-configured to replicate the volumes on a minimum of 3
 nodes.
 
-From this point, as we will be handling High Available cluster, we will be
-using a setup with minimum 3 nodes all the time.
+From this point, as we will be handling a High Availablity cluster, we will be
+using a setup with a minimum of 3 nodes all the time.
 
 NOTE: **Localpv storage class** is available as well. It will still allow any node
-to mount a volume from this class, but, the volumes will be locked to the node
-they got created. While there is a small performance benefit, in case of
-disaster, disaster will be with total unavailability of the affected websites.
-I strongly recommend on using Jiva, as node crushes will not be disasters, just
-temporary, quickly fixable issues.
+to mount a volume from this class, but, the volumes will be locked to the node in
+which they were created. While there is a small performance benefit, in the case of a
+disaster, that disaster would be the total unavailability of the affected websites.
+So, I strongly recommend using Jiva, as node crashes will not be disasterous, just
+temporary and quickly fixable issues.
 
 **What is OpenEBS offering us?**
 
