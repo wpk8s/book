@@ -235,13 +235,13 @@ Next add MicroK8s:
 
 `sudo snap install --classic microk8s`
 
-It will download and install latest version of it, and we can do again
-our previous first WordPress deployment.
+It will download and install the latest version of it, and we can repeat
+our previous WordPress deployment.
 
 TIP: Visual Studio Code users. Install the *https://j.mp/2MwT3ZO[Remote SSH]*
 extension, and follow this https://j.mp/3tzUGGs[help]
-for making life easy when you will have to work with a lot of cloud
-servers. I will use it to exemplify from now on.
+for making life easy when you need to work with a lot of cloud
+servers. I will use it as an example from now on.
 
 To recap the identical scenario that we have experimented locally:
 
@@ -249,17 +249,14 @@ Enable DNS, Ingress and Storage addons.
 
 `sudo microk8s enable dns ingress storage`
 
-Create a folder named `wordpress` and in it, use *nano* or your favorite
-editor to create the same files we did previous.
+Create a folder named `wordpress` and within it, use *nano* or your favorite
+editor to create the same files we did previously.
 
 TIP: For Visual Studio Code users, if you did follow my advice for *Remote
 SSH*, you should have discovered how quickly you can connect to the
-server and now is allowing you to edit files like you would be local and
+server and now it allows you to edit files like you would locally and
 if you open a Visual Studio Code *Terminal* it is actually opening the
-prompt through ssh in the cloud server. Just enjoy simplicity.
-
-Create a folder `wordpress` and within it, the following files, identical to
-the local experiment.
+prompt through ssh in the cloud server. Just enjoy it's simplicity.
 
 .https://j.mp/3q0UdLp[kustomization.yml]
 [source,yaml,linenums]
@@ -421,11 +418,11 @@ spec:
           storage: 10Gi
 ----
 
-Open the terminal, change directory `cd wordpress`.
+Open the terminal and change directory `cd wordpress`.
 
 Run `sudo microk8s kubectl apply -k ./`, and while we wait 1-2 minutes
-to be first time deployed, let's put in our local hosts file the ip of the
-cloud server to test our online WordPress installation.
+for the first time deployment, let's put the ip of the cloud server 
+in our local hosts file to test our online WordPress installation.
 
 On Windows, right click on the *Start* icon and click on *Command Prompt
 (admin)* or *Powershell (admin)*, whichever is available. After
@@ -442,33 +439,33 @@ use the ip from the cloud server you have created instead of
 After you saved the hosts file, try loading https://wordpress.k8s in the
 browser.
 
-NOTE: I did not setup yet anything for *HTTPS* as we are going to look
-in different ways we can setup that, as you might need to know each one,
-depending on how your clients need to have *HTTPS* setup.
+NOTE: I did not set anything up for *HTTPS* yet as we are going to look
+at different ways we can set that up, as you might need to know each one,
+depending on how your clients need to have *HTTPS* configured.
 
 WARNING: Do not leave this demo WordPress available online as it is.
-Run again it's deletion command `sudo microk8s kubectl delete -k ./` and
-optionally delete the cloud server (you will need to recreate it for
+Run it's deletion command again `sudo microk8s kubectl delete -k ./` and
+you could even delete the cloud server (you will need to recreate it for
 future chapters).
 
-OK, so, we did it, we have live online WordPress, running on MicroK8s.
+OK, so we did it, we had live online WordPress, running on MicroK8s.
 What is next?
 
 In the following chapter we will concentrate on how to prepare _recipes_
-to ensure the services use exact versions we need and we will experiment
+to ensure the services use the exact versions we need and we will experiment
 in upgrading them, as this is a critical requirement in a secured
-environment and also a benefit for avoiding bugs.
+environment and also a necessity for avoiding bugs.
 
-Also, we will see to setup multiple websites. We will detail running
-WordPress with self updates and than look into locking and managing
-WordPress like other modern php projects, by using
+Also, we will see how to setup multiple websites. We will explore running
+WordPress with auto updates and then look into locking and managing
+WordPress like any other modern php project, by using
 https://j.mp/3rt7ay4[Composer] and https://j.mp/2LtvPmK[Roots - Bedrock]
-for modern WordPress development, that helps us to put WordPress in
+for modern WordPress development, that can help us to put WordPress in
 CI/CD - one dedicated chapter following to help you discover this DevOps
 style of working with WordPress, in an easy way for everybody.
 
 We will also extend our *WordPress* websites with extra services like
-ElasticSearch to have blazing speed in search, and instant suggestions,
+ElasticSearch to have blazing speed in searches, and instant suggestions,
 and add caching using Redis, add monitoring and observability, alerts
-and many other things. If I really captured your attention, I do hope you
+and many other things. If I have really captured your attention, I do hope you
 will enjoy the full book.
