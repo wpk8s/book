@@ -41,7 +41,7 @@ is stable and is added by default.
 === Introducing OpenEBS
 
 For High Availablity storage, OpenEBS on MicroK8s will be the fastest with
-the benefit of minimal maintenance effort.
+ the benefit of minimal maintenance effort.
 
 The addon comes with two storage classes, and I want you to remember one
 thing: **openebs-jiva-default** is the only thing you need to use to
@@ -65,36 +65,36 @@ temporary and quickly fixable issues.
 
 **What is OpenEBS offering us?**
 
-Simply put, OpenEBS provides network compatible volumes with real-time mirroring of
-data, so in case of a node that was storing the data crashing, at least
-two others have the exact same data. If a container with a volume attached
-to it crashes due to a node failure, it is restarted very quickly on another
+OpenEBS provides simply network compatible volumes, with real-time mirroring of
+data, so in case of the crush of the node that is storing the data, at least
+two other have the identical same data. If a container with a volume attached
+to it crushes as of a node failure, it is restarted very quickly on another
 node, and the volume is re-attached to it. Even if the node had a copy of the
-volumes data, failure does not affect it, as the volume can still run from the other
-sources. With a proper alert system in place, you could intervene and fix
-the node's issue in little to no time, or in my preference, I make sure I have the problem logs
+volumes data, failure is not felt, as the volume can still run from the other
+sources. With proper alerting system in place, you could jump in time and fix
+the node's issue, or in my preference, I make sure I have the problem logs
 available, and simply create a new node in the cluster, and remove the old
 broken one. After getting my ideal state of the cluster back, I can now
-research on the problem without having the cluster in danger, and the visitors
+research in the problem without having the cluster in danger, and the visitors
 would not even know there was a problem.
 
 Another advantage of OpenEBS is that one volume could be shared. Meaning we
-will be able to use a volume attached to WordPress, spread over multiple nodes
-to increase performance during high traffic. We can add nodes, we can remove nodes.
-This helps keeping costs lower over time, without causing any downtime as you
+will be able to use a volume attached to WordPress, spread on multiple nodes
+to increase performance on high traffic. We can add nodes, we can remove nodes.
+This helps keeping costs lower in time, without causing any downtime as you
 need in classic vertical scaling setups.
 
-One limitation at the time of writing of this book is that
-https://github.com/openebs/dynamic-nfs-provisioner[Dynamic NFS Provisioner] is
+One limitation at the writing of the book is that
+https://github.com/openebs/dynamic-nfs-provisioner[Dynamic NFS Provisioner] was
 not yet stable and included by default. I do hope the day OpenEBS marks it
-stable, Canonical will update the included addon to support it will be easy to
-enabled it. This storage class would allow Read-Write-Many, so you
+stable, Canonical will update the included addon to support it with easy to
+get it enabled option. This storage class would allow Read-Write-Many, so you
 could pump the WordPress pod replicas to whatever number you need.
 
 === Setting up a Highly Available Cluster
 
-Using the setup we had up until now, we can replicate the model from Chapter 4 at
-least 3 times to have a minimum of 3 nodes available to setup the cluster. Just stop
+Using the setup we did until now, we can replicate the setup from Chapter 4, at
+least 3 times to have minimal 3 nodes available to setup the cluster. Just stop
 right before `sudo microk8s enable dns ingress storage`.
 
 The next step we need is to install and enable iscsi daemon, to allow OpenEBS
@@ -108,7 +108,7 @@ sudo apt install open-iscsi
 sudo systemctl enable --now iscsid
 ----
 
-Now in one node only (I usually do the first one), run the command to get
+Now, simply, only in one node, first one I usually do, run the command to get
 the add node command with token:
 
 `sudo microk8s add-node`
@@ -125,21 +125,21 @@ If the node you are adding is not reachable through the default interface you ca
  microk8s join 172.16.0.3:25000/f6308cb5dea38cb7c785adfe347a214a/eaf81c74de94
 ----
 
-Copy the last line and run it prefixed with `sudo ` on your second node.
+Copy the last line and run it prefixed with `sudo ` on second node.
 
-Repeat the process for each node, first get the command with token, then run it
+Repeat the process for each node, first get command with token, second run it
 on the new node.
 
 You can have as many nodes you want like this.
 
-Next, on the first node, or another one if you would prefer, run:
+Next, on first node, or another one if you would insist, run:
 
 `sudo microk8s enable dns ingress openebs`
 
-It will take up to a minute.
+It will take some time, up to a minute.
 
 When you are done, if you run `sudo microk8s status` you should have a similar
-output to the following:
+output:
 
 [source,text]
 ----
@@ -156,44 +156,44 @@ addons:
     openebs              # OpenEBS is the open-source storage solution for Kubernetes
 ----
 
-The rest of the information is about disabled addons, so you can ignore it.
+The rest of information is about disabled addons, so you can ignore the rest.
 
 The above, shows I have a cluster of 6 nodes, with 3 masters and 3 worker
 nodes that in case of a dead master, any could replace it. With more than 3
-nodes I surely sleep well when 1-2 nodes crash during the night, as long
-as the total workload can be sustained by the healthy nodes.
+nodes I surely sleep well when 1-2 nodes crush during the night, as long
+as the total amount of workload can be sustained by healthy nodes.
 
-Regarding this, I usually calculate that I use 70-80% of available resources,
+Regarding this, I usually calculate that I use 70-80% of amount of resources,
 but I don't go under 3 nodes, if my low traffic load can use 1 node only.
 We will talk about how to estimate resources later in the book.
 
-Before we dive into WordPress, you need to redo the `cert-manager` addition, so
-the cluster will be capable of handling HTTPS needed certificates automatically.
+Before we dive in WordPress, you need to redo the `cert-manager` addition, so
+the cluster will be capable to handle automatically HTTPS needed certificates.
 I will use the Letsencrypt option, as I prefer it. If you use alternatives,
-adjust the recipes to use the correct certificate.
+adjust in the recipes to use the correct certificate.
 
 Let's now tweak our original WordPress recipe. When we see it working, we will
-manually experiment with node issues, simulating the common problems you might face
-when  the public cloud provider has issues or certain nodes become unavailable
-for example (we would simply destroy the node, which would be equivalent for our
+experiment manually nodes issues, simulating common problems you might face
+when for example, the public cloud provider has issues and certain nodes become
+unavailable (we will simply destroy the node, which will be equivalent for our
 cluster when node is not available because of the provider).
 
 IMPORTANT: Database nodes can't be replicated by bumping up the number of
-replicas. If you are looking into Mysql/MariaDB replication, then the only
-easy way is https://mariadb.com/kb/en/galera-cluster/[Galera], potentially by
-defining multiple pods, as each server must be unique. Alternatively, other
-solutions exist, but they tend to have much more complex setup and administration.
+replicas. If you are looking into Mysql/MariaDB replication, than the only
+easy way is https://mariadb.com/kb/en/galera-cluster/[Galera], possible by
+defining multiple pods, as each server must be unique. Alternative, other
+solutions exist, but with much more complex setup and administration.
 
-I will edit the **WordPress** recipe we used before now, replacing the local
+I will edit the **WordPress** recipe we used until now, replacing the local
 storage part with OpenEBS Jiva storage class.
 
-NOTE: To ensure that my recipes are kept safe, I use git to track changes. This
+NOTE: To ensure that I keep my recipes safe, I use git to keep changes. This
 way, I can run them from any node, anytime, and keep changes synced. Personally
-I use my first node like a "master" and do all operations from it alone,
-and if it dies, I pick the next one to be my "master", but as the recipes are kept
-in git, I can just pull the latest and everything is still there. One note on it, I
+I use my first node usually like a "master" and do all operations only from it,
+and in case it dies, I pick next one to be my "master", but the recipes, kept
+in git, I just pull the latest and everything is still there. One note on it, I
 keep secrets separate and add them by environment - I will show you later how I
-keep secrets safe even in git. These recipes could be even be shared openly, as they do
+keep secrets safe even in git. This recipes could be even be shared open, as do
 not expose anything sensitive about your content and data.
 
 Secrets stay like before:
@@ -276,7 +276,7 @@ spec:
           storage: 10Gi
 ----
 
-The change in the above is the addition of `storageClassName: openebs-jiva-default`.
+The change in the above is in adding `storageClassName: openebs-jiva-default`.
 Now, our MySQL/MariaDB pod can move from node to node in our larger MicroK8s
 cluster.
 
@@ -379,8 +379,8 @@ spec:
           storage: 10Gi
 ----
 
-Let's ROCK: `sudo microk8s.kubectl apply -k ./`. Like before, will take a
-while, possibly up to 2 minutes on a fresh cluster that needs to pull
+Let's ROCK: `sudo microk8s.kubectl apply -k ./`. Like before, will take a few
+seconds, possible up to 1-2 minutes on a fresh cluster that needs to pull
 container images, and our website will be available.
 
 Now load the website.
