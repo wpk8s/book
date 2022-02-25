@@ -2,51 +2,51 @@
 == Cloud - first demo
 
 In this chapter, we are going to try the same thing we did locally, but
-in the public cloud. We will cover single node, allowing to run MicroK8s
-with only it's official supported addons, and we will use from begining
-some configuration that will allow us to upgrade to multi-nodes in the
-feature.
+in the public cloud. We will cover single node, allowing us to run MicroK8s
+with only it's official supported addons, and we will use some configuration
+from begining that will allow us to upgrade to multiple nodes in the
+future.
 
-To ensure upgrade to multiple nodes will be possible, some things need
-to be thought and decided.
+To ensure an upgrade to multiple nodes will be possible, some things need
+to be considered and decided upon.
 
-Most of the online resources will point towards using Kubernetes
-multiple nodes on same network, that being set as in same VPC (Virtual
-Private Cloud) in Amazon AWS or other providers, to ensure you can use
-an internal private network and share easier certain resources, like
-networked file system, and focus to protect the cluster from one
+Most of the online resources will point towards using Kubernetes with
+multiple nodes on the same network, that are set in same VPC (Virtual
+Private Cloud) in Amazon AWS or any other provider, to ensure you can use
+an internal private network and easily share certain resources, like a
+networked file system, and focus on protecting the cluster with one
 internet single entry point.
 
 Let's create a private network in our project.
 
-But let's focus on the simple implementation, just one node, MicroK8s
+For now let's focus on the simple implementation, just one node, MicroK8s
 with it's official addons, and make sure it can be extended.
 
 I will be using https://j.mp/3cLf8hH[Hetzner] for my public cloud
-provider. Using them, will require to go through the process to validate
+provider. Using them, will require going through the process to validate
 your identity, as they are very strict on security and avoiding fraud.
-You should use any preferred public cloud although, and adapt to their
-dashboard, as things are mostly common between clouds. I personally
-choose Hetzner, as having great performance and security, while being
-the lowest in price, and suits my personal projects requirements saving me
+You can use any preferred public cloud though, and adapt according to their
+dashboard, as things are fairly common between clouds. I personally
+choose Hetzner, as they have great performance and security, while being
+lowest in price, and they suit my personal project requirements saving me
 a lot of money. I am not concerned about locations of servers, as on top
-I use Cloudflare which will ensure to deliver with lowest latency
+I use Cloudflare which will ensure delivery with lowest latency
 responses to the visitors - more in a later chapter about this and
 alternatives to Cloudflare.
 
 If you want to read some comparison done by https://j.mp/2YPYfua[Rasmus
-Lerdorf] on decent priced public cloud servers, it might help you in
-making a decision. I think he's be a better reference than me to
-influence you in your choice.
+Lerdorf] on reasonably priced public cloud servers, it may help you in
+reaching a decision. I think he is a better reference than I to
+influence your choice.
 
-Let's start with one basic cloud server, sized at 1 core and 2GB of ram
+Let's start with one basic cloud server, sized at 1 core and 2GB of RAM
 to experiment.
 
-Hetzner supports the separation of resources by naming them Projects.
-Either use the default one or, better, create a new dedicated one to
+Hetzner supports the separation of resources by naming them 'Projects'.
+Either use the default one or, preferably, create a new dedicated one to
 learn. Resources in one project are isolated from other projects.
 Projects also allow you to invite collaborators, and they will be
-limited at project level. A project can also be later transferred to a
+limited at the project level. A project can also be transferred later to a
 client.
 
 image:images/hetzner-create-project.png[Create project]
@@ -57,14 +57,14 @@ PROJECT*.
 image:images/hetzner-create-network.png[Create network]
 
 Next, on the left sidebar, click *Networks*, click *CREATE NETWORK*,
-name it for example `wpk8s`, and give it a range, like `172.16.0.0`.
-This would be full class B private network, Hetzner would create
+name it, for example `wpk8s`, and give it a range, like `172.16.0.0`.
+This will be a full class B private network, Hetzner creates
 sub networks inside of it, and that will give us 65534 auto assignable ip
 addresses that on any cloud server with this network attached will be
-pre configured if selected on creation, or configurable manually with a
-very simple how linked from the dashboard. As a note why I use class B
-networks, as it is less used in local networks. Also avoid `10.0.0.0/8`
-as it is used by default with Kubernetes.
+pre configured if selected on creation. Alternatively, they are configurable manually in a
+very simple way linked from the dashboard. As a note, the reason I use class B
+networks is becasue they are used less in local networks. Also try to avoid `10.0.0.0/8`
+as they are used by default with Kubernetes.
 
 image:images/create-ssh-key-win10.png[Create ssh key]
 
@@ -80,7 +80,7 @@ open *CMD* or *Windows Terminal* and type
 the _some-word-to-identify-this-computer_ with something representative
 for you. After a few *Enter* presses, when back on prompt, run
 `type .ssh\id_rsa.pub | clip`. This will copy the public version of the
-key in the clipboard, and you can paste it now in Hetzner's panel.
+key in the clipboard, and you can paste it now in Hetzner's ssh panel.
 
 On MacOS, open *Terminal* and run
 `ssh-keygen -b 4096 -C 'some-word-to-identify-this-computer'` replacing
@@ -91,11 +91,11 @@ for you. After a few *Enter* presses, when back on prompt, run
 In Linux, like on MacOS, to copy in the clipboard run
 `cat .ssh/id_rsa.pub` and select and copy with the mouse. An alternative
 to _clip_ and _pbcopy_ does not come by default with most distributions
-and simple there are a lot of them, and different between X11 and Wayland.
+and there are a lot of them, all different between X11 and Wayland.
 
 image:images/hetzner-add-ssh-publickey.png[Add the ssh public key]
 
-In the Hetzner's panel, in the sidebar, click *Security*, *ADD SSH KEY*,
+In the Hetzner panel, in the sidebar, click *Security*, *ADD SSH KEY*,
 paste the key, it's name will be prefilled with the comment name you
 used when generated, but you may change it to identify it easy here in
 the panel.
@@ -104,16 +104,16 @@ the panel.
 
 *Select a location*. For the future, using multiple locations is ideal
 for High Availability, something I will detail in different scenarios in
-the following chapters - worry free, no alarms at 3AM. I use servers in
+the following chapters - worry free, no alarms at 3AM. I use servers in the
 same location to do horizontal scaling and multiple locations to setup
-replications for high availability or disaster recovery, depends on how
+replications for high availability or disaster recovery, depends on what
 the clients choose.
 
 *Select Ubuntu 20.04 or latest LTS version*. Setup can be done on other
 distributions, but for simplicity, I will demo using Ubuntu.
 
-*Select Standard with Local storage type*. Possible to respond to why
-local and not *Network (CEPH)*, simply because IO (input/output)
+*Select Standard with Local storage type*. The reason why we choose
+local and not *Network (CEPH)*, is because IO (input/output)
 operations with the disk are close to native ssd/nvme on your local
 computer, and network is slow.
 
@@ -121,7 +121,7 @@ NOTE: When we will see how to do advanced setup for MariaDB (MySQL),
 you will understand the critical benefit achieved with local storage
 and how easy we can set either replication or backups to recover very
 quickly or automatically from disasters, achieving maximum performance in
-read/write operations, most costly for any application with database
+read/write operations, which is most costly for any application with database
 access. If performance with the database is not critical in your
 situation and you intend to use a single node only, network storage type
 could help you to allow Hetzner to recover in a few minutes from a
@@ -129,30 +129,30 @@ failure, as they move cloud servers to other hosts in the datacenter,
 and the volumes are already accessible from network, also being triple
 replicated and highly available for any situation.
 
-*Select CX11*. When you will select for production and large setups,
+*Select CX11*. When you select for production and large setups,
 please note that switching between _CX?_ and _CXP?_ cloud servers is not
-possible, even with network storage (possible will change in the future
-for network storage type). I'm choosing _CX?_ (Intel) types in general,
-but _CXP?_ (AMD) types work well for having higher cpu cores ratio
-towards memory; _CXP?_ is good candidate to isolate php workers and web
-servers and _CX?_ preferred for database or cache services for more ram.
-Benefit of choosing is financial balance in the end.
+possible, even with network storage (maybe this will change in the future
+for network storage type). I am choosing _CX?_ (Intel) types in general,
+but _CXP?_ (AMD) types work well for having higher cpu cores ratioed
+towards memory; _CXP?_ is a good candidate to isolate php workers and web
+servers and _CX?_ is preferred for database or cache services for more ram.
+In the end, the choice is based on finding financial balance.
 
-Also a strong note, which applies to any public cloud, not Hetzner only,
-*Standard* or *Shared* (how Digital Ocean names) instance types are not
-intended for long continuous processing, so I strongly advise you to
+Also a strong note, which applies to any public cloud, not only Hetzner,
+*Standard* or *Shared* (Digital Ocean nomenclature) instance types are not
+intended for long continuous processing, so I strongly advise that you
 avoid using them for continuous processing like video conversion,
 optimizing images. If this is done occasionally within processes of a
-few minutes, it is fine, but having them for hours, it's breaking the
-terms and conditions of usage in all public clouds. For this kind of
+few minutes, it is fine, but having them for hours, often breaks the
+terms and conditions of usage in public clouds. For this kind of
 almost non-stop processing, use *Dedicated* types.
 
 *Select the network we created*. This will automatically setup the
-private network in the cloud server and doing this even for a single
+private network in the cloud server and doing this, even for a single
 node, will help you for future expansion.
 
 Click on user data and type or copy/paste the following, changing the
-user if you wish so:
+user if you wish to:
 
 .https://j.mp/3p08OW2[Gist link]
 [source,shell,linenums]
@@ -185,24 +185,24 @@ _original source: https://j.mp/3pHxfZt[Digital Ocean]_
 Select the SSH key you added.
 
 Give it a *fully qualified domain name* as name. I'll be using
-`vm1.hel1.wp.k8s`. Make sure you will use a proper
+`vm1.hel1.wp.k8s`. Make sure you use a proper
 *https://en.wikipedia.org/wiki/Fully_qualified_domain_name[fqdn]*, as
 this is important when you expand to multi-nodes. The domain name does
-not need to be a real registered one. I use domains with DNS that does
-not exists, to avoid dns issues in case somebody registers it.
+not need to be a real registered one. I use domains with a DNS that does
+not exist, to avoid dns issues in the case of somebody else registering it.
 
 Hit the Create button and wait a few seconds, usually 15-30 seconds, and
-you can copy the server's ip, just a click on it is necessary and back
-in your terminal ssh into it, example: `ssh wpk8s@135.181.93.201`. It
-will ask first time to give it a password. Type a decent strong
-password, hit enter, you will need to confirm it, and will exit. Now hit
-up key again and ssh again in it. It will login without asking for the
+you can copy the server's ip, just clicking on it is necessary and back
+in your terminal ssh into it, for example: `ssh wpk8s@135.181.93.201`. It
+will ask the first time for a password. Type a decent strong
+password, hit enter, you will need to confirm it, and the it will exit. Now hit
+up key again and ssh back into it. It should login without asking for the
 password.
 
 From now on, the password will be required only when we run commands
-using `sudo` or if you'll need to ssh in from another device.
+using `sudo` or if you need to ssh in from another device.
 
-Next we can do exactly the same scenario we did in the local experiment
+Next we can repeat the same scenario we had in the local experiment
 from the previous chapter, except that we need to install *snap* to be
 able to install MicroK8s. The following first commands should be run
 anyway in an online environment.
@@ -222,9 +222,9 @@ strongly recommend you run
 
 `sudo apt upgrade -y`
 
-If within the list there is the linux kernel also, starts with
-*linux-image*, please do reboot the virtual server after it finishes,
-and ssh in back after around 15-30 seconds.
+Within the list, if there is also the linux kernel (starts with linux-image),
+please do a reboot of the virtual server after it finishes and wait around 30
+seconds before you ssh back in.
 
 Now install *snap* (make sure you type *snapd* for package installation,
 as snap package older and kept this namespace):
@@ -235,13 +235,13 @@ Next add MicroK8s:
 
 `sudo snap install --classic microk8s`
 
-It will download and install latest version of it, and we can do again
-our previous first WordPress deployment.
+It will download and install the latest version of it, and we can repeat
+our previous WordPress deployment.
 
 TIP: Visual Studio Code users. Install the *https://j.mp/2MwT3ZO[Remote SSH]*
 extension, and follow this https://j.mp/3tzUGGs[help]
-for making life easy when you will have to work with a lot of cloud
-servers. I will use it to exemplify from now on.
+for making life easy when you need to work with a lot of cloud
+servers. I will use it as an example from now on.
 
 To recap the identical scenario that we have experimented locally:
 
@@ -249,17 +249,14 @@ Enable DNS, Ingress and Storage addons.
 
 `sudo microk8s enable dns ingress storage`
 
-Create a folder named `wordpress` and in it, use *nano* or your favorite
-editor to create the same files we did previous.
+Create a folder named `wordpress` and within it, use *nano* or your favorite
+editor to create the same files we did previously.
 
 TIP: For Visual Studio Code users, if you did follow my advice for *Remote
 SSH*, you should have discovered how quickly you can connect to the
-server and now is allowing you to edit files like you would be local and
+server and now it allows you to edit files like you would locally and
 if you open a Visual Studio Code *Terminal* it is actually opening the
-prompt through ssh in the cloud server. Just enjoy simplicity.
-
-Create a folder `wordpress` and within it, the following files, identical to
-the local experiment.
+prompt through ssh in the cloud server. Just enjoy it's simplicity.
 
 .https://j.mp/3q0UdLp[kustomization.yml]
 [source,yaml,linenums]
@@ -421,11 +418,11 @@ spec:
           storage: 10Gi
 ----
 
-Open the terminal, change directory `cd wordpress`.
+Open the terminal and change directory `cd wordpress`.
 
 Run `sudo microk8s kubectl apply -k ./`, and while we wait 1-2 minutes
-to be first time deployed, let's put in our local hosts file the ip of the
-cloud server to test our online WordPress installation.
+for the first time deployment, let's put the ip of the cloud server 
+in our local hosts file to test our online WordPress installation.
 
 On Windows, right click on the *Start* icon and click on *Command Prompt
 (admin)* or *Powershell (admin)*, whichever is available. After
@@ -442,33 +439,33 @@ use the ip from the cloud server you have created instead of
 After you saved the hosts file, try loading https://wordpress.k8s in the
 browser.
 
-NOTE: I did not setup yet anything for *HTTPS* as we are going to look
-in different ways we can setup that, as you might need to know each one,
-depending on how your clients need to have *HTTPS* setup.
+NOTE: I did not set anything up for *HTTPS* yet as we are going to look
+at different ways we can set that up, as you might need to know each one,
+depending on how your clients need to have *HTTPS* configured.
 
 WARNING: Do not leave this demo WordPress available online as it is.
-Run again it's deletion command `sudo microk8s kubectl delete -k ./` and
-optionally delete the cloud server (you will need to recreate it for
+Run it's deletion command again `sudo microk8s kubectl delete -k ./` and
+you could even delete the cloud server (you will need to recreate it for
 future chapters).
 
-OK, so, we did it, we have live online WordPress, running on MicroK8s.
+OK, so we did it, we had live online WordPress, running on MicroK8s.
 What is next?
 
 In the following chapter we will concentrate on how to prepare _recipes_
-to ensure the services use exact versions we need and we will experiment
+to ensure the services use the exact versions we need and we will experiment
 in upgrading them, as this is a critical requirement in a secured
-environment and also a benefit for avoiding bugs.
+environment and also a necessity for avoiding bugs.
 
-Also, we will see to setup multiple websites. We will detail running
-WordPress with self updates and than look into locking and managing
-WordPress like other modern php projects, by using
+Also, we will see how to setup multiple websites. We will explore running
+WordPress with auto updates and then look into locking and managing
+WordPress like any other modern php project, by using
 https://j.mp/3rt7ay4[Composer] and https://j.mp/2LtvPmK[Roots - Bedrock]
-for modern WordPress development, that helps us to put WordPress in
+for modern WordPress development, that can help us to put WordPress in
 CI/CD - one dedicated chapter following to help you discover this DevOps
 style of working with WordPress, in an easy way for everybody.
 
 We will also extend our *WordPress* websites with extra services like
-ElasticSearch to have blazing speed in search, and instant suggestions,
+ElasticSearch to have blazing speed in searches, and instant suggestions,
 and add caching using Redis, add monitoring and observability, alerts
-and many other things. If I really captured your attention, I do hope you
+and many other things. If I have really captured your attention, I do hope you
 will enjoy the full book.
