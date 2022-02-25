@@ -222,9 +222,9 @@ strongly recommend you run
 
 `sudo apt upgrade -y`
 
-If within the list there is the linux kernel also, starts with
-*linux-image*, please do reboot the virtual server after it finishes,
-and ssh in back after around 15-30 seconds.
+Within the list, if there is also the linux kernel (starts with linux-image),
+please do a reboot of the virtual server after it finishes and wait around 30
+seconds before you ssh back in.
 
 Now install *snap* (make sure you type *snapd* for package installation,
 as snap package older and kept this namespace):
