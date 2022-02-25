@@ -2,49 +2,49 @@
 == HTTPS
 
 HTTPS is mandatory today for a website. It can work without, but to have a
-website, an online service online, serving visitors from everywhere, HTTPS
-is mandatory to offer them a guarantee that data traveled between their
+website, an online service, serving visitors from everywhere, HTTPS
+is essential to offer them a guarantee that data traveled between their
 device and your website is encrypted and no middleman will be able to capture
-sensitive personal data they might share with you.
+the sensitive personal data they might share with you.
 
-I'll give you a basic example, related to common WordPress usage. You might
-host online a popular local news website that allows visitors to comment on
-the published articles. Your comment form is asking for a name and an email,
+I'll give you a basic example related to common WordPress usage. Lets say you
+host a popular local news website that allows visitors to comment on
+the published articles. Your comment form asks for a name and an email,
 besides the comment body. The website is served without a secure certificate.
 In the region, there's public WiFi access in all main areas, and most of
-the local people have been connecting to this networks without too much
-worries. Your website and the public WiFi is trusted by the local communities
-of people. But recently, nobody knew, because of poor security of the WiFi
-public network, a hacker managed to infiltrate some service, capturing all
+the local people have been connecting to this network without too much
+worry. Your website and the public WiFi is trusted by the local community.
+But recently, although nobody knew, due to poor security of the public
+WiFi network, a hacker managed to infiltrate some service, capturing all
 insecure data traffic, between clients and the target service. In this case,
-your website. So, the hacker is easily collecting all names, emails, easy
-associated and sells them to some evil intended organization. What's even
-worse, he can even rewrite parts of the responses, to change the truth of
+your website. So, the hacker can easily collect all names, emails, and all
+associated to sell them to some organization with evil intentions. Worse
+still, he can even rewrite parts of the responses, and change the truth of
 some articles.
 
-OK, it might sound a bit harsh the previous paragraph, but it is a totally
-possible scenario, and even more critical can happen. We use WordPress to
-create websites for medical centers, for kindergartens, news services, etc.
-It is mandatory to make our website or service to use http://j.mp/3b8zE9D[HTTPS].
+OK, the previous paragraph might sound a bit harsh, but it is an entirely
+possible scenario. It would be even worse where critical personal information is concerned.
+We use WordPress to create websites for medical centers, for kindergartens, news services, etc.
+It is absolutely necessary to make our website or service use http://j.mp/3b8zE9D[HTTPS].
 
-To make an example for this, I will prepare the following scenarios using
-subdomains of real domains I own, as this is the most common scenario I am
-sure the readers of this book intend to use, and to be able to fully
+To demonstrate this, I will prepare the following scenarios using
+subdomains of real domains that I own, as this is the most common scenario I
+believe the readers of this book would intend on using. To be able to fully
 understand this, you should practice it with at least one real domain. If
-you don't have any, you could buy a domain to use for personal portfolio,
-blog, email etc.
+you don't have any, you could buy a domain to use for a personal portfolio,
+blog or email etc.
 
-Before we dive in setting up secure servers, one thing to note is, this layer
+Before we dive into setting up secure servers, one thing to note is this layer
 of the service involves additional cpu usage, not too much if the traffic is
-low on a website, but on a heavy traffic WooCommerce website, on a Black Friday
-event, would be easier to measure how much it's affecting. So, we will cover
-solutions starting from simple to advanced.
+low on a website, but on a heavy traffic WooCommerce website, during a Black Friday
+event, it would be easier to measure what effect it is having. So, we will cover
+solutions starting with the most simple and then move to advanced.
 
-Let's create a **healtcheck** service very light, that you could use it in
-your clusters simply to provide some endpoints for doing a basic healthcheck
+Let's create a very light **healtcheck** service, that you could use in
+your clusters in order to provide some endpoints for doing a basic healthcheck
 for an Ingress entry.
 
-In any directory you consider, for example `healthcheck`, create:
+Create a directory of your choice, for example `healthcheck`, and add:
 
 .healthcheck-service.yml
 [source,yaml,linenums]
@@ -87,47 +87,47 @@ spec:
 
 === cert-manager
 
-With almost any way of setting up https and using digital x509 certificates, we
+With almost every method of setting up https and using digital x509 certificates, we
 need a way to handle them. Meet https://cert-manager.io[**cert-manager**].
 
-What it does, exactly as it's name suggests, it is a tool to manage certificates
-in a kubernetes cluster. Short, for this book, I will focus on how it can handle
+What it does, exactly as it's name suggests, is manage certificates
+in a kubernetes cluster. Shortly in this book, I will focus on how it handles
 Let's encrypt and Cloudflare edge.
 
-To install cert-manager, all we need to do it to run one command. First, please
+To install cert-manager, all we need to do is run one command. First, please
 open https://github.com/jetstack/cert-manager/tags[cert-manager tags] on
-Github, and check for the most high release tag version possible. As I write the
+Github, and check for the most high release tag version possible. At the time of writting this
 book, it's 1.2.0. Now, run, replacing the version if necessary:
 `microk8s.kubectl apply -f https://github.com/jetstack/cert-manager/releases/download/v1.2.0/cert-manager.yaml`
 
 In about a minute or two, it should finish applying minimal configuration and
-start required services it needs. We have not yet spent time on RBAC, but if have
+start the required services it needs. We have not yet spent time on RBAC, but if you have
 enabled it in the cluster, do be aware it needs extra setup that we will cover
-later in the book, not needed at current level yet.
+later in the book, however it is not needed at this current level.
 
-Next, we will cover three cases: ACME / Let's encrypt, CA issuer, possible useful
-for remote testing clusters, and external Cloudflare Origin CA.
+Next, we will cover three cases: ACME / Let's encrypt, CA issuer (possibly useful
+for remote testing clusters) and external Cloudflare Origin CA.
 
 === Let's encrypt
 
 Let's encrypt needs to verify and validate the ownership of the domain or
-subdomain that the certificate is intended to be used. Without this, a certificate
-can't be issued. The easy way, is HTTP01 and the possible complicated one
-is DNS01, but needed for wildcard certificates.
+subdomain that the certificate is intended to be used with. Without this, a certificate
+can't be issued. The easy way is HTTP01 and the more complicated one
+is DNS01, but the latter is needed for wildcard certificates.
 
-Let's start with the HTTP01, simplest to setup and possible most used.
+Let's start with the HTTP01, easiest to setup and most widely used.
 
-We need to setup a cert-manager Issuer that will handle automatically
+We need to setup a cert-manager Issuer that will automatically handle
 creation and renewals of certificates. Let's encrypt has a staging and a
-production mode, and I do recommend setting up both, as if you need to
-test before production, staging is very relaxed over api calls. Forcing
-directly production while something was not done right, might cause reaching
-failed validation limit of 5 per hour on a host. Trying first staging will
-make you sure production should not fail. Read more if necessary
-https://letsencrypt.org/docs/rate-limits/[here].
+production mode, and I would recommend setting up both, in case you need to
+test before production, staging is very relaxed over api calls. Forcibly
+going to production while something is not configured right, might cause it to reach it's
+failed validation limit of 5 per hour on a host. Trying staging first will
+ive you assurance that production will not fail. Read more https://letsencrypt.org/docs/rate-limits/[here]
+if necessary.
 
 Next, let's create the Staging Issuer. Make a folder named `cert-manager`.
-Create `acme-staging-issuer.yml` file and paste the following, making sure
+Create an `acme-staging-issuer.yml` file and paste the following, making sure
 you replace the **email** key value with a real one you have access to.
 It's important as any issues related to the certificate will be sent
 to this email address.
@@ -230,10 +230,10 @@ We can monitor generation of the certificate by running:
 The status is in the `Ready` column and once ok, should be `True`.
 
 To inspect the certificate run:
-`microk8s.kubectl describe certificate wpk8s-club-demo-tls`, replacing with
+`microk8s.kubectl describe certificate wpk8s-club-demo-tls`, replacing "wpk8s-club-demo-tls" with
 the name you gave for the certificate.
 
-If it worked, let's make it for production.
+If it worked, let's make it ready for production.
 
 Edit the `wordpress-statefulset.yml` and change `letsencrypt-staging` to
 `letsencrypt-prod`.
@@ -311,59 +311,59 @@ for my website and I added the entry also to the tls spec, letting
 cert-manager know it needs to add it to the SAN entry of the certificate.
 
 Understanding certificates needs a long good chapter, and today's
-standards are slightly different than what were many years ago and some
+standards are slightly different from what they were many years ago and some
 classic usage of paid certificates might not be compliant with what
-modern browsers like Microsoft Edge, Google Chrome and Firefox are preferring.
+modern browsers like Microsoft Edge, Google Chrome and Firefox prefer.
 
 What we have managed above, is the basics of modern free certificates with
 Let's encrypt, and we will come back to the topic when you want to cover
-extra SAN (Subject Alternate Name), when we will see how to manage a common
+extra SAN (Subject Alternate Name), when we see how to manage a common
 certificate for WordPress Multi-Sites installation.
 
-NOTE: Wildcard Let's Encrypt certificates must be done different, and requires
+NOTE: Wildcard Let's Encrypt certificates must be done differently, and require
 a more complex setup. I will detail this in a dedicated chapter later, to keep
-to simple things first.
+things simple at first.
 
 === Cloudflare
 
 This setup involves Cloudflare to provide
 public facing certificate for visitors and private certificate for communication
-between Cloudflare network and our infrastructure. Other alternatives to Cloudflare
-should provide identical result.
+between Cloudflare network and our infrastructure. Alternatives to Cloudflare
+should provide an identical result.
 
 IMPORTANT: If you are going to use services like Cloudflare, I strongly recommend
-you do read for any component used from it to research careful it's pricing
-model. Cloudflare starts from free, and can cover all essential needs of a
-WordPress website, including DNS, DDOS protection, Cache, Firewall on the free
-level offered, but each of them, and all the extra comes with small prices which
-increases depending on different aspects.
+that you read up on any component used from it tand research it's pricing
+model carefully. Cloudflare starts from free, and can cover all the essential needs of a
+WordPress website, including DNS, DDOS protection, Cache and Firewall on the free
+level offered, but each of them, and all the extras come with small prices which can
+increase depending on different aspects.
 
 image:images/cloudflare-full-strict.png[Ideal encryption using Cloudflare]
 
-What we see in the screenshot above is the browser communicates securely with
+What we see in the screenshot above is the browser communicating securely with
 Cloudflare, which communicates securely with our server. You should research
-for a deep dive in the topic using
-http://j.mp/37jBl2P[their official support pages] at the moment
-you want to understand the technical aspects of how it works. I will guide
-you step by step how to implement this.
+for a deep dive into the topic using
+http://j.mp/37jBl2P[their official support pages], though at the moment
+you only want to understand the technical aspects of how it works. I will guide
+you step by step on how to implement this.
 
-First, if you do not have a Cloudflare account, proceed and create one. The
-registration does not involve any spending and it's a few minutes process.
-If you do not intend yet to do it, it's fine, read along or feel free to jump
+First, if you do not have a Cloudflare account, proceed to create one. The
+registration does not involve any spending and it's a process of only a few minutes.
+If you do not want to do it yet, it's fine, read along or feel free to jump
 to the alternative fully managing on your own digital certificates, I will
-provide minimal security tips along the book enough to help.
+provide minimal security tips throughout the book which should be enough to help.
 
 Cloudflare requires that the domain name will use them as DNS, so you will have to go
 through their process of switching the DNS nameservers for your domain to them. The
 process is easy, and will copy all current DNS records to make sure it will not break
 any already setup email records, anti spam records and others you might already have.
 Make sure to review all discovered records, and once you do transfer the nameservers,
-there might be a few minutes to a few hours of waiting period to be fulfilled.
-Cloudflare will offer you a status change if you recheck the page anytime you want.
+there might be a few minutes to a few hours of a waiting period to be fulfilled.
+Cloudflare will offer you a status change if you go back to check the page anytime you want.
 
 IMPORTANT: Keep Origin CA certificates configuration separate from a
-website's kubernetes configuration; will detail verbose in structuring
-configuration in files and directories. To fully benefit of Cloudflare's
+website's kubernetes configuration; it will detail the structuring
+configuration in files and directories verbosely. To fully benefit from Cloudflare's
 total protection, the **SSL/TLS encryption mode** must be set to
 **Full (strict)**. Remember, that this affects all possible subdomains
 proxied through Cloudflare!
@@ -377,21 +377,21 @@ https://github.com/cloudflare/origin-ca-issuer.git[Origin CA issuer]
 repo or on https://github.com/cloudflare/origin-ca-issuer/releases[Releases]
 page download the latest zip, and unzip it in the `cloudflare` directory.
 
-Change directory in it and run the following commands:
+Change directory into it and run the following commands:
 
 `microk8s.kubectl apply -f deploy/crds`
 
 `kubectl apply -f deploy/manifests`
 
-You might spot an error in output like this, but as of Kubernetes nature
+You might spot an error in output like this, but due to Kubernetes nature
 of self healing, the manifests will be applied.
 
 image:images/cloudflare-deploy-manifests-output-error.png[Apply manifests possible error]
 
-IMPORTANT: Next part, a bit tricky, so make sure you are careful to use your exact
-CA API key as the example one is a fake one to provide the example.
+IMPORTANT: For the next part,  it is a bit tricky, so make sure you are careful to use your exact
+CA API key as the example one is only a fake one to provide the example.
 
-Change one directory above, should be now in `cloudflare`.
+Change directory one level up, should now be in `cloudflare`.
 
 [source,bash]
 ----
@@ -425,21 +425,21 @@ Let's apply the configuration:
 
 `microk8s.kubectl apply -f origin-issuer.yml`
 
-What did we just did? We have created our Cloudflare Origin CA issuer
-which will be used to ask Cloudflare to prepare if doesn't exists
+What did we just do? We have created our Cloudflare Origin CA issuer
+which will be used to ask Cloudflare to prepare, if it doesn't exist,
 an origin certificate, and schedule it's refresh as needed.
 
 We can create common origin certificates for handling all subdomains
 of one domain and reuse in Ingress configurations or, on Ingress
-configuration we can do isolated definition for being explicit on
+configuration we can do isolated definitions to be explicit on
 using a dedicated origin certificate for a specific subdomain.
 
-The second version it's preferred for best security, as Cloudflare
-is not limiting you in how many origin certificates are handled.
+The second version is preferred for best security, as Cloudflare
+does not limit how many origin certificates are handled.
 
 Cloudflare offers an additional security enhancement:
 **Authenticated Origin Pulls**. The following is the explanation from
-their help:
+their documentation:
 
 *Authenticated Origin Pulls allow you to cryptographically verify that requests to
 your origin server have come from Cloudflare using a TLS client certificate. This
@@ -447,35 +447,35 @@ prevents clients from sending requests directly to your origin, bypassing securi
 measures provided by Cloudflare, such as IP and Web Application Firewalls, logging,\
 and encryption.*
 
-If you will enable it, the website will continue to work, but to actually use
+If you enable it, the website will continue to work, but in order to actually use
 it, we need to setup an additional certificate resource in our cluster, that will
-be used on any website that we want to use it.
+be used on any website where we want to use it.
 
-To be able to use this, we need to setup a secret in our Cluster, to keep the
+To utilise this, we first need to setup a secret in our Cluster, to keep the
 `origin-pull-ca.pem` certificate we can download from Cloudflare, and use it
 with https://kubernetes.github.io/ingress-nginx/user-guide/nginx-configuration/annotations/#client-certificate-authentication[Nginx Ingress annotations]
 
-To download it, copy the link from the above article, to make sure you will use
+To download it, copy the link from the above article, to make sure you are using
 the latest published version. I had some confusion initially as the certificate
-validity date was in the past, so I was thinking it's expired, why do they use it.
-Technical that is not a blocker, a certificate for private end to end encryption
-are not locked by expiration, that's a choice if to accept or reject.
+validity date was in the past, so I thought it had expired and wondered why they used it.
+Technically that is not a blocker, a certificate for private end to end encryption
+is not locked by expiration, there is a choice whether to accept or reject.
 
 In a directory you want to keep certain files, like this one, download it:
 
 `curl -LO https://support.cloudflare.com/hc/en-us/article_attachments/360044928032/origin-pull-ca.pem`
 
 The above command would download the version that was published at the date I
-was writing this chapter, so make sure you replace with the current one if was
-changed.
+was writing this chapter, so be sure to replace it with the current version if it has been
+updated.
 
-IMPORTANT: Always, always, always check a certificate:
+IMPORTANT: Always, always, always check the certificate:
 `openssl x509 -in origin-pull-ca.pem --noout -text`.
-And read all output to ensure it is really it is the certificate you intend to use.
+And read allthe entire output to ensure it really is the certificate you intend to use.
 Signatures and other data from the output can actually help you to make sure
 you have the real certificate you intend to use, comparing to trusted data the
 issuer could provide you. Also, ALWAYS use this command to make sure you have a
-real valid certificate before you would create or update it in Kubernetes.
+real valid certificate before you create or update it in Kubernetes.
 
 Create a `cloudflare-origin-pull-ca-secret.yml.tmpl` file and paste the following:
 
@@ -492,7 +492,7 @@ data:
 ----
 
 IMPORTANT: DO NOT try to change `ca.crt` key value name as it is expected
-by Nginx Ingress annotation and there is no current way to override yet.
+by Nginx Ingress annotation and there is currently no way to override it.
 
 Now, create a shell script so you do not need to learn a longer complicated
 command to apply it when you will need to update it.
@@ -509,10 +509,10 @@ If you have already read about TLS certificates and Kubernetes, you might have
 noticed that I used `generic` type to store it. That is because `kubernetes.io/tls`
 is for client or server certificates, which **cert-manager** manages for example.
 We will cover that type in the next section, where we see how to manage
-certificates you might have paid for if you need to use for example an EV TLS
-certificate.
+certificates you might have paid for if you need to use an EV TLS
+certificate for example.
 
-Let's check if the certificate has been correctly stored.
+Let's check if the certificate has been stored correctly.
 
 `microk8s.kubectl get secret cloudflare-origin-pull-ca-tls -o json | jq -r '.data["origin-pull-ca.pem"]' | base64 --decode`
 
@@ -539,12 +539,12 @@ Save `diff-certificates.sh` and run
 
 `bash ./diff-certificates.sh`
 
-If any difference, it will be output. If there is no difference, than
-will not output anything. Nothing means good to go!
+If any differences exist, they will be outputed. If there is no difference, then there
+will be no output. Nothing means good to go!
 
 OK, let's now apply our certificate to our testing Ingress entry.
 
-Let's change directory where we stored the `test.yaml` for our origin subdomain
+Let's change directory to where we stored the `test.yaml` for our origin subdomain
 experiment.
 
 .test.yml
@@ -578,10 +578,10 @@ spec:
                   number: 8080
 ----
 
-Add in your file the extra annotations from the above. Make sure your hosts values
-are pointing to your subdomain, as covered when we created initially.
+Add the extra annotations from the above to your file. Make sure your host values
+are pointing to your subdomain, as covered when we created it initially.
 
-To check load in the browser the url and should still work. Now to check rejection.
+To check it, load the url in the browser and it should still work. Now to check rejection.
 
 In the command line run:
 
@@ -606,58 +606,58 @@ If so, everything works as expected.
 
 What have we achieved?
 
-We use Cloudflare to handle HTTPS for us and protect the origin server, including
-DDOS attacks and allow us to benefit of extra cache closer to our visitors.
+We use Cloudflare to handle HTTPS for us and protect the origin server,
+while also affording us the benefit of extra cache closer to our visitors.
 Cloudflare will make sure our origin is the expected one, by verifying the origin's
-certificate to be the one it generated for us, from cert-manager's automation. Our
-origin server is allowing strictly Cloudflare to make request to this particular
+certificate against the one it generated for us from cert-manager's automation. Our
+origin server is strict, allowing only Cloudflare to make requests to this particular
 domain.
 
-I strongly recommend this type of configuration for websites that will handle
-authenticated users, transporting real personal data, so it fits all membership,
-ecommerce, handling bookings or events for visitors as an example. Risk of an
-exposure of sensitive data would minimized, and allows us to focus strictly to
-keep our WordPress core, plugins, theme up to date, and of course, keeping
+I strongly recommend this type of configuration for websites that, to give a few examples, are made to handle
+authenticated users, transport real personal data or deal with any elements of membership, also
+ecommerce or bookings and events for visitors. The risk of an
+exposure of sensitive data would be minimized, which allows us to focus only on
+keeping our WordPress core, plugins and theme up to date, and of course, keeping
 apache, php and mariadb services at recent maintained versions covered by all
 security updates.
 
 === Bought SSL/TLS certificates
 
-In this last part, I will go through one of possible most simple configuration
+In this last part, I will go through one of possibly the most simple configurations
 to use, for the ones that might require a particular type of certificate, especially
-the EV type, which should be the type of certificate a company would use, to
-prove actually their validation from a trusted authority. I do recommend this
-type of certificates to all companies I maintain infrastructure.
+the EV type, which would be the type of certificate a company would use, to
+prove their validation is from a trusted authority. I actively recommend this
+type of certificates to all companies I maintain infrastructure for.
 
 Read more on https://en.wikipedia.org/wiki/Extended_Validation_Certificate[Wikipedia]
-about this particular type of certificates that are giving more trust for
+about this particular type of certificates that are more trustworthy in
 certain cases.
 
 Next, to continue with the example on how we saved an origin CA certificate
 I will present how to store an SSL/TLS certificate to be used by any NGINX Ingress
-configuration we need. This procedure does not involve cert-manager like previous,
-and works on bare MicroK8s out of the box. The downside is that this certificates
-will always need manual steps to ensure that are up to date, including paying
+configuration we might need. This procedure does not involve cert-manager like we saw previously,
+but works on bare MicroK8s out of the box. The downside is that these certificates
+will always need manual steps to ensure that they are up to date, including paying
 to renew them, replacing them and so on. If you have to deal with hundreds of
-certificate, make sure you are very careful with your calendar entries and set
-maximum amount of time for first alarm to renew, as it is much better than
-leaving renewal just a few days before with the excuse to save a little money.
+certificates, make sure you are very careful with your calendar entries and set the
+maximum amount of time for the first alarm to renew, as it is much better than
+leaving renewal just a few days before with the idea to save a little money.
 Avoid any disasters, especially if you manage websites that bring revenue.
 
 Let's get started.
 
 From the authority you pay for the certificate, you normally get a `.crt` and
 a `.key` file. Kubernetes has dedicated secret storage for this kind of data,
-optionally to include the `.ca` which might come packed with the other two.
+plus the option to include the `.ca` which might come packed with the other two.
 
 Please read also the
 https://kubernetes.io/docs/concepts/configuration/secret/#tls-secrets[official documentation]
-about this optionally and recommended.
+about this option and recommendations.
 
-In a folder you want to keep your certificate files and the kubernetes
+You want to keep your certificate files and the kubernetes
 configuration file that will create and update the certificates when you
-apply it, I recommend to save your files with the main domain name
-used in the subject of the certificate, example `wpk8s.club.crt` and
+apply it together in a folder. I recommend saving your files with the main domain name
+used in the subject of the certificate, for example `wpk8s.club.crt` and
 `wpk8s.club.key` I would use in my domain case.
 
 Create a file named using the domain, like `tls-secret-wpk8s.club.yml.tmpl`.
@@ -682,8 +682,8 @@ I tend to use a simple inventory notebook for this, as it's a few seconds
 to check and make sure.
 
 Create a shell script to help with replacing content on the fly and apply the
-secret in the cluster. If generated content is different, the cluster will
-update the secret. If identical, will simply ignore.
+secret to the cluster. If generated content is different, the cluster will
+update the secret. If identical, will just ignore.
 
 .tls-secret-wpk8s.club-apply.sh
 [source,sh,linenums]
@@ -697,13 +697,13 @@ sed "s/TLS_CRT/`cat wpk8s.club.crt|base64 -w0`/g" \
 
 IMPORTANT: Make sure to replace with correct names the script name and content!
 
-If you have all them ready, apply:
+If you have all of them ready, apply:
 
 `sh ./tls-secret-wpk8s.club-apply.sh`
 
 In case you do not have real certificates, but you want to practice the above,
-let's do this: let's generate self signed certificates. Technical, to learn,
-will be fully valid, just remember, this are totally useless for production.
+let's do this: let's generate self signed certificates. Technically, they
+will be fully valid, just remember, these are totally useless for production, this is just to learn.
 
 We will use `openssl` for this with an adapted example from:
 https://docs.microsoft.com/en-us/dotnet/core/additional-tools/self-signed-certificates-guide#with-openssl[Microsoft's documentation for developers]
@@ -750,10 +750,10 @@ openssl x509 -noout -text -in $PARENT.crt
 ----
 
 The example can be extended to include extra subject alternative names or
-adjust validity time, but let's keep it to basic to understand the process.
+adjust validity time, but let's keep it basic to understand the process.
 
 `bash ./generate-self-signed-certificate.sh` to generate a certificate. When
-prompted for domain name, give one you want, I will use `selfsigned.wpk8s.club`.
+prompted for domain name, give it the one you want, I will use `selfsigned.wpk8s.club`.
 
 Next create a template configuration file, adjusting with correct name:
 
@@ -783,7 +783,7 @@ sed "s/TLS_CRT/`cat selfsigned.wpk8s.club.crt|base64 -w0`/g" \
   microk8s.kubectl apply -f -
 ----
 
-Next we can use it for a Nginx Ingress configuration. Will reuse the healthcheck
+Next we can use it for an Nginx Ingress configuration. We can reuse the healthcheck
 service to have another Ingress entry pointed to it, using subdomain selfsigned.
 
 Create a new yaml file, and replace all parts needed for your own domain (`wpk8s-club-selfsigned`, `selfsigned.wpk8s.club`):
@@ -821,7 +821,7 @@ Apply: `microk8s.kubectl apply -f ./selfsigned.wpk8s.club-ingress.yml` (with cor
 filename) and a quick test could be done running:
 `curl -vk https://selfsigned.wpk8s.club` (using your domain).
 
-The output of the `curl` command should output something like:
+The output of the `curl` command should look something like:
 
 [source,text]
 ----
@@ -837,19 +837,19 @@ CN should contain your subdomain and domain and you should be able to identify
 by start date and expire date.
 
 Let's continue the experiment. We will update the certificate, simulating
-we would replace with a new issued one before expiration.
+how we would replace it with a newly issued one before it's expiration.
 
-Run again the command to create the certificate:
+Run the command to create the certificate:
 `bash generate-self-signed-certificate.sh`
-and use exact same subdomain and domain name you used.
+and use the exact same subdomain and domain name you used.
 
 Apply the tls configuration:
 `bash tls-secret-selfsigned.wpk8s.club-apply.sh`
 
-Run again `curl`:
+Run `curl`:
 `curl -vk https://selfsigned.wpk8s.club`
 
-And now you will see the certificate start and expire date changed:
+And now you will see that the certificate start and expire date has changed:
 
 [source,text]
 ----
@@ -863,13 +863,13 @@ And now you will see the certificate start and expire date changed:
 
 I did this experiment in a one day difference to ensure the procedure
 is working as expected and I encourage you to experiment the same way,
-creating testing subdomains to ensure the change happens.
+creating testing subdomains to ensure the change goes through.
 
-Similar, for Let's Encrypt certificates, while in preparation phases, you could
+Similarly, for Let's Encrypt certificates, while in the preparation phases, you could
 setup healthcheck subdomains with at least a few days before (I try like a
 week if possible) and either check yourself, using a calendar to give you
-reminders, or by using an external tool that would send you an alert if
+reminders, or by using an external tool that would send you an alert if the
 certificate is not ok.
 
-Let's move now on a new chapter and discuss about the WordPress container
+Let's move now to a new chapter and discuss the WordPress container
 image and two ways of running WordPress.
