@@ -6,7 +6,7 @@ a lot will be added, subscribe on Leanpub to get notifications when
 a new updated version is published, as you can continue downloading
 it after being purchased.
 
-I'm so glad you have opened the first book I've wrote and do hope you
+I'm so glad you have opened the first book I have written and do hope you
 are a passionate WordPress developer or system engineer who wants to
 learn how to use https://j.mp/2YPGTO0[Kubernetes] using the simple
 certified distribution https://j.mp/3pZ5yeP[MicroK8s], a product
@@ -18,111 +18,111 @@ and issues can be reported and discussed.
 
 This book is full of ready to use solutions and recipes for deploying
 even the most advanced WordPress websites in the public cloud, ensuring
-high security, high performance, high availability, removing many
+high security, high performance, high availability, in order to prevent many
 hours of recovering from disasters and having to write embarrassing
 reports to the clients or managers.
 
 I will introduce you to the wonderful world of observability and
 monitoring, enjoying those cool dashboards you might have seen in video
-presentations or screenshots from tech stuff of large companies.
+presentations or screenshots from tech staff of large companies.
 
-The book is strongly opinionated on how things are done, but I hope
-that by learning, you can adapt to your own needs, choices and thoughts
-and even do it better. I do not want to enforce anyone in only my way,
-it was purely simple to exemplify everything by using specific vendors,
-services and how I did it myself. Things can be done in many
+This book is strongly opinionated on how things are done, but I hope
+that by learning, you can adapt the ideas to your own needs, and 
+even do it better. I do not want to force anyone to go only my way,
+it was just simple to exemplify everything by using specific vendors,
+services and my own experience. Things can be done in many
 other ways and as you learn a few fundamental ones, you will be able to
-create yourself alternatives.
+create alternatives yourself.
 
-Also, the choice of the companies used for public cloud services was
-done for the lowest price possible, while still being trust worthy for
-quality and availability. I intended just to ensure lowest costs for
+Also, the choice of companies used for public cloud services was
+made for the lowest price possible, while still being trust worthy for
+quality and availability. I intended to ensure the lowest costs for
 any beginner learner, as learning on real public cloud services will
-involve also some financial investment. For anyone unable to spend
-on public cloud, the book will provide enough resources to learn.
-Hopefully those in this case, will find sponsorship from companies they
-work in. The links I provide for some of the public cloud, although
-are referral links, I'm going to keep them updated, for initial credit
-to use for free on most of the ones that would involve money spending.
+also involve some financial investment. If anyone is unable to spend
+on public cloud, the book will still provide enough resources to learn.
+Hopefully those in such a situation, can find sponsorship from the companies they
+work in. I am going to keep updating the links I provide for some of 
+the public cloud (although only referral links) for initial credit
+to use for free on most of the ones that would involve spending.
 
 I will start with a basic way of getting a local setup, equivalent of
-what we will use in the cloud, so you understand how could you quickly
+what we will use in the cloud, so you understand how you could quickly
 experiment locally or even have a local version to work with
 WordPress identical to how it will be in the cloud. This ensures
 identical web server setup, identical php, mysql versions and any
 extra services.
 
-Than we shall dive in starting in the cloud, first with a single node
-example, following with how to setup WordPress either to benefit of it's
-auto updates functionality, or to lock and enforce exact core, plugins
-and themes versions by managing ourselves the code, versioning it in git
+Then we will dive in, starting in the cloud. First with a single node
+example, following with how to setup WordPress either to benefit from it's
+auto-update functionality, or even to enforce an exact version of the core, 
+plugins and themes by managing the code ourselves, versioning it in git
 and setting up a minimal https://j.mp/2OgLQgP[CI/CD] setup using
-https://j.mp/3aFS5SL[GitHub Actions] to build automatically container
-images that will be simply deployed in our MicroK8s cluster. Will
+https://j.mp/3aFS5SL[GitHub Actions] to automatically build container
+images that will be easily deployed in our MicroK8s cluster. We will
 explore testing automation for WordPress, helpful for plugin and theme
-developers. Also, I shall present how to use
-https://bit.ly/2LtvPmK[Roots Bedrock] as alternative to standard
-WordPress version, a more modern alternative for developers building
+developers. Also, I will present how to use
+https://bit.ly/2LtvPmK[Roots Bedrock] as an alternative to standard
+version of WordPress, a more modern alternative for developers building
 custom web applications with WordPress at it's foundation.
 
 We'll expand the cluster to multi node setup, extend the storage to
 support replication and being usable by multiple containers, discovering
-how to do horizontal scaling of WordPress, to avoid errors, for example
+how to do horizontal scaling of WordPress to avoid errors, for example
 Black Friday issues for a popular WooCommerce shop. No
 more 503 or 504 HTTP errors. Horizontal scaling is the technique used
 by the large websites that seemed like some black magic to many small
-companies, but with Kubernetes it is something simple, not anymore a
-magic recipe available only to large corporations. It also could save a
+companies, but with Kubernetes it is something simple, no longer a
+magic recipe available only to large corporations. It could also save a
 lot of money compared to classic vertical scaling (increasing server
-size) which comes with mandatory short to possible long unavailability
-time and waisted resources.
+size) which comes with mandatory shor, and possibly long, unavailability
+time and wasted resources.
 
-I shall explain you how to setup HTTPS with special created
+I will explain how to setup HTTPS with specialy created
 certificates, using CDN services like https://j.mp/3tyYl7B[CloudFlare]
-with origin verification and allowing requests to come strictly from it
-and your extra allowed IP addresses increasing the security of the
-website for free at a total different level. Will discover the benefits
-of security and optimizations services offered by providers like
-CloudFlare which would be more expensive to be managed by ourselves.
+with origin verification, allowing requests to come strictly from it
+and any extra allowed IP addresses, increasing the security of the
+website for free at a totally different level. We will discover the benefits
+to security and optimization services offered by providers like
+CloudFlare, which would be more expensive if managed by ourselves.
 
-We'll dive in extending WordPress to use
-https://j.mp/3rHt6pl[Elastic Search] for fastest search possible on
-websites with huge amount of data, making WooCommerce websites with
-millions of articles providing response time from seconds to milliseconds.
+We will dive into extending WordPress to use
+https://j.mp/3rHt6pl[Elastic Search] for the fastest search possible on
+websites with a huge amount of data, making WooCommerce websites with
+millions of articles provide a response time of milliseconds rather than seconds.
 
-Will add https://j.mp/3aFf9Bk[Redis] service to ensure shared php session
-management is working perfect when using horizontal scaling, benefiting
-extra for object caching, and page caching shared between any number of
+We will add https://j.mp/3aFf9Bk[Redis] service to ensure shared php session
+management is working perfectly when using horizontal scaling, benefiting
+object caching, and page caching shared between any number of
 workers of the same website.
 
-Will look in setting up our own improved email sending service,
-capturing logs and ensuring many expected rules of throttling email
-amount not to be marked as a spam source.
+We will look at setting up our own improved email sending service,
+capturing logs and enforcing many expected rules of throttling email
+amount in order to not be marked as a spam source.
 
-We shall setup https://j.mp/3pY8wAt[Prometheus],
+We will setup https://j.mp/3pY8wAt[Prometheus],
 https://j.mp/2MERGbe[Grafana] and https://j.mp/3oRdWMc[Elastic Stack] to
-gain power of every metric of our cluster, services and WordPress
-websites, have access with almost instant search over all logs from
-everything. Will deep dive in capturing slow requests and discovering
-which is the offending service, code or query that caused it. Also setup
+gain control of every metric of our cluster, services and WordPress
+websites, and have access with almost instant search over all logs from
+everything. We will deep dive into capturing slow requests and discovering
+the offending service, code or query that causes it. Also we will setup
 almost instant https://j.mp/36PFXOd[alerts] for anything concerning us,
-allowing us to fix problems before disasters would happen.
+allowing us to fix problems before any disaster happens.
 
-If you really want to master that, I do recommend you read the book
-chapter by chapter and at same time practice each example, experiment
-more by changing, hacking, tweak as you think best. For me,
+If you really want to master that, I do recommend that you read the book
+chapter by chapter and simultaneously practice each example and experiment
+more by changing, hacking, tweak as you see fit. For me,
 this way allowed me to learn, and I decided as for my passion for
 WordPress and cloud engineering, to put everything in this book
-optimized for WordPress. I'm always open to learn better ways and
-do not hesitate to contact me if you have something to share and you'd
+optimized for WordPress. I am always open to learn better ways and
+do not hesitate to contact me if you have something to share and you would
 like to see it in updated versions of this book.
 
 I really hope you will enjoy this book, as much as I did writing it.
 
-And as you have been patient and read this introduction, just wanted to
-give you a mention that the book has also a https://wpk8s.club[website] where
+And as you have been patient enough to read this introduction, I just wanted to
+mention that the book has also a https://wpk8s.club[website] where
 I publish a blog with related topics and host a forum for all interested
-people to discuss about WordPress, Kubernetes and MicroK8s.
+people to discuss WordPress, Kubernetes and MicroK8s.
 
 PS: This book is in the process of writing right now, with a short free
 edition introducing to the basic concepts and an ongoing long version
