@@ -15,8 +15,7 @@ mandatory for a WordPress intended cluster, is Highly Available Storage.
 
 === Local storage vs highly available storage
 
-MicroK8s comes with two alternative storage solution addons, at one step
-distance to use any of it.
+Within the list, if there is also the linux kernel (starts with linux-image), please do a reboot of the virtual server after it finishes and wait around 30 before you ssh back in.
 
 The one that existed since the beginning of the project, LOCAL, allowed
 containers to use volumes strictly if they run on the same host.
