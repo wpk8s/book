@@ -1,129 +1,40 @@
 [[ch02-why-containers]]
 == Why containers?
 
-This chapter's purpose is to understand what containers are and the
-benefits of running services isolated within them.
+This chapter's purpose is to understand what containers are and the benefits of running services isolated within them.
 
-**Containers** are a simple native capability of the Linux kernel. It is a concept
-that exists in other operating systems although somehow different. Importantly, from an
-abstract view, they offer some business value: isolation and resource
-limitation.
+**Containers** are a native capability of the Linux kernel. It is a concept that exists in other operating systems although somehow different. Importantly, from an abstract view, they offer some business value: resource isolation.
 
-Containers are an implementation of https://bit.ly/3a20EZ5[OS-level
-virtualization]
+Containers are an implementation of https://en.wikipedia.org/wiki/OS-level_virtualization[OS-level virtualization]
 
-In our case,the  main interest would be how WordPress could run this way with
-all required services.
+In our case, the main interest would be how WordPress could run this way with all required services.
 
-First, we would have one or more containers that provide PHP and all
-required extensions that make WordPress run and allow different plugins
-to enhance the website. How it will run is up to how we prefer PHP to
-run, as there are multiple ways to run PHP, and there are different
-opinions on which is the best way.
+First, we would have one or more containers that provide PHP and all required extensions that make WordPress run and allow different plugins to enhance the website. How it will run is up to how we prefer PHP to run, as there are multiple ways to run PHP, and there are different opinions on which is the best way.
 
-PHP can run either as an Apache HTTPD module, a cgi process which a web
-server like Apache HTTPD or Nginx can use by fastcgi or old slow cgid
-mode, as PHP-FPM, the native process manager of PHP or by command line
-with it's native server capability.
+PHP can run either as an Apache HTTPD module, a cgi process which a web server like Apache HTTPD or Nginx can use by fastcgi mode with PHP-FPM, the native process manager of PHP or by command line with it's native server capability.
 
-From the above, running as PHP-FPM or Apache HTTPD module are the best
-modes for containerizing WordPress main process. They are almost
-identical regarding performance for response time, PHP-FPM winning
-regarding lower memory usage, especially when we want to benefit
-from horizontal scaling and other extra features that we will be discussing
-later.
+From the above, running as PHP-FPM or Apache HTTPD module are the best modes for containerizing WordPress main process. They are almost identical regarding performance for response time, PHP-FPM winning regarding lower memory usage, especially when we want to benefit from horizontal scaling and other extra features that we will be discussing later.
 
-https://bit.ly/3a1DUs2[**Horizontal scaling**] - when our website faces a
-high amount of traffic, for example an ecommerce website on Black Friday
-sales, we need to ensure that all services have enough resource
-power to face the hits. We can either scale up the virtual server or the
-shared hosting package we use, if it is possible, or we could increase
-the number of instances that run our website and balance the traffic
-to the instances that are easily increased in number more and
-more. So horizontal scaling is a technique by which we multiply
-the necessary services without changing the configuration and we consume
-more and more from the allowed infrastructure, in a way that is more
-accurate and measurable, all without facing any downtime. We can also
-decrease, resulting in minimizing the costs, while we continuously serve
-the visitors. **No downtime, no slowdown!**
+https://en.wikipedia.org/wiki/Scalability#Horizontal_(scale_out)_and_vertical_scaling_(scale_up)[**Horizontal scaling**] - when our website faces a high amount of traffic, for example an ecommerce website on Black Friday sales, we need to ensure that all services have enough resource power to face the hits. We can either scale up the virtual server or the shared hosting package we use, if it is possible, or we could increase the number of instances that run our website and balance the traffic to the instances that are easily increased in number more and more. So horizontal scaling is a technique by which we multiply the necessary services without changing the configuration and we consume more and more from the allowed infrastructure, in a way that is more accurate and measurable, all without facing any downtime. We can also decrease, resulting in minimizing the costs, while we continuously serve the visitors. **No downtime, no slowdown!**
 
-A PHP container image, would be constructed on top of a linux
-distribution minimal environment, by adding all required dependencies.
-But we do not have to do this ourselves, as prebuilt
-images exist, and even dedicated WordPress starting images have been
-built by the Docker community, which we can use to understand how it
-runs. As we advance through our workshop, we will start by getting the
-community's example image quickly up and running and then continue by
-constructing our own extended images when we want total control over
-them.
+A PHP container image, would be constructed on top of a linux distribution minimal environment, by adding all required dependencies. But we do not have to do this ourselves, as prebuilt images exist, and even dedicated WordPress starting images have been built by the Docker community, which we can use to understand how it runs. As we advance through our workshop, we will start by getting the community's example image quickly up and running and then continue by constructing our own extended images when we want total control over them.
 
-Another container image would offer MySQL, MariaDB or Percona Server for
-MySQL. They do not limit the features in anyway and to running them is
-even easier than setting up yourself, even if you are using an
-installer or linux distribution's package manager. The official
-community's container images, expect to set the name of the database
-through environment variables, user and password and would simply
-initiate and start the server. They are ready-built for running
-within containers and tweaking configuration based on cpu or memory limits,
-allowing us also to override anything like we would do for a normal
-installation as well.
+Another container image would offer MySQL, MariaDB or Percona Server for MySQL. They do not limit the features in anyway and to running them is even easier than setting up yourself, even if you are using an installer or linux distribution's package manager. The official community's container images, expect to set the name of the database through environment variables, user and password and would simply initiate and start the server. They are ready-built for running within containers and tweaking configuration based on cpu or memory limits, allowing us also to override anything like we would do for a normal installation as well.
 
-Running MySQL in containers offers two more benefits over running it
-in the classic way.
+Running MySQL in containers offers two more benefits over running it in the classic way.
 
-The major one is that we are truly isolating data between websites, as each
-container would run an instance of the service and we have one database
-per instance. If we have multiple WordPress websites, each one could
-benefit from a dedicated MySQL service, ensuring availability is as per
-defined limits. This might be something in the interest of websites that
-work with user and epayments data, and this level of isolation would be
-the most beneficial.
+The major one is that we are truly isolating data between websites, as each container would run an instance of the service and we have one database per instance. If we have multiple WordPress websites, each one could benefit from a dedicated MySQL service, ensuring availability is as per defined limits. This might be something in the interest of websites that work with user and epayments data, and this level of isolation would be the most beneficial.
 
-The other benefit is that you can run multiple versions of MySQL and
-later on we will see that upgrading the database for a website, does not
-risk crashing all websites if some happen to break on a
-more recent server version. This gives you a breathing room when doing
-upgrades and avoids the embarrassment of sending dozens of apologies to
-customers with explanations for the suffered downtime. And as we are in
-the world of containers, we will learn a technique that can provide no
-downtime upgrades even in case of a broken upgrade. I bet you really
-want to be able to do that. Don't worry, you will learn in this book a
-technique for zero downtime upgrades.
+The other benefit is that you can run multiple versions of MySQL and later on we will see that upgrading the database for a website, does not risk crashing all websites if some happen to break on a more recent server version. This gives you a breathing room when doing upgrades and avoids the embarrassment of sending dozens of apologies to customers with explanations for the suffered downtime. And as we are in the world of containers, we will learn a technique that can provide no downtime upgrades even in case of a broken upgrade. I bet you really want to be able to do that. Don't worry, you will learn in this book a technique for zero downtime upgrades.
 
-Next, we can add additional services that offer higher performance to
-WordPress and are worry free when we use a horizontal scale technique. With
-plugins that offer object caching, page caching, enhanced searching, all
-in the benefit of increased performance, adding this services to
-WordPress is, again, as easy as official supported images with
-configuration through environment that exist in the community.
+Next, we can add additional services that offer higher performance to WordPress and are worry free when we use a horizontal scale technique. With plugins that offer object caching, page caching, enhanced searching, all in the benefit of increased performance, adding this services to WordPress is, again, as easy as official supported images with configuration through environment that exist in the community.
 
-Another benefit that I really want to point out is easily centralized
-logging and integration with a system that could be run either externally or
-in the same cluster to monitor and raise alerts when issues are
-instantly discovered. We will try out Elastic Search and Prometheus for
-this purpose, two solutions which are available as addons that are
-simple to enable with MicroK8s and rather than learning how to set them
-up, you simply learn how to use them, and in this book I will teach you
-the best way regarding WordPress.
+Another benefit that I really want to point out is easily centralized logging and integration with a system that could be run either externally or in the same cluster to monitor and raise alerts when issues are instantly discovered. We will try out Elastic Search and Prometheus for this purpose, two solutions which are available as addons that are simple to enable with MicroK8s and rather than learning how to set them up, you simply learn how to use them, and in this book I will teach you the best way regarding WordPress.
 
-One thing about the communities around containers, they're made up of
-huge numbers of people that constantly participate in keeping container
-images as perfect as could be, and that makes life really simple when using
-them. Great benefit for everybody, from veteran down to complete beginner in this.
+One thing about the communities around containers, they're made up of huge numbers of people that constantly participate in keeping container images as perfect as could be, and that makes life really simple when using them. Great benefit for everybody, from veteran down to complete beginner in this.
 
-The most known community centralizes efforts on
-https://bit.ly/3ryhNQ2[Docker Hub], which offers automation for building
-container images based on Dockerfile recipes, hosts the generated image
-files, and has a big team of specialists, most of them paid by
-participating companies in this effort, for curating, maintaining and
-ensuring that official images will run as expected with almost no issues.
-This is the community I have trusted since the very beginning and it has never failed me.
+The most known community centralizes efforts on https://hub.docker.com/[Docker Hub], which offers automation for building container images based on Dockerfile recipes, hosts the generated image files, and has a big team of specialists, most of them paid by participating companies in this effort, for curating, maintaining and ensuring that official images will run as expected with almost no issues. This is the community I have trusted since the very beginning and it has never failed me.
 
-Alternative communities or commercial based image repositories exist,
-backed by RedHat, Microsoft's Github and many others, but their usage
-goes beyond our purposes of running WordPress in containers and using one
-Kubernetes simplified platform, MicroK8s.
+Alternative communities or commercial based image repositories exist, backed by RedHat, Microsoft's Github and many others, but their usage goes beyond our purposes of running WordPress in containers and using one Kubernetes simplified platform, MicroK8s.
 
-So in the end, why containers? Stability, simplicity, performance,
-observability, scalability and high availability. Did I also mention
-automation? Well, let's dive in!
+So in the end, why containers? Stability, simplicity, performance, observability, scalability and high availability. Did I also mention automation? Well, let's dive in!
