@@ -4,10 +4,10 @@ wpk8s.pdf
 
 book/contributors.txt
 
-vendor/*
+.bundle/vendor/
 
 ### VisualStudioCode ###
-.vscode/*
+.vscode/
 !.vscode/tasks.json
 !.vscode/launch.json
 *.code-workspace
