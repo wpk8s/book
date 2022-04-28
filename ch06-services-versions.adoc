@@ -1,24 +1,15 @@
 [[ch06-services-versions]]
 == Services versions
 
-I'm really glad you've made it this far. We still have a few steps until we
-achieve a basic production grade concept to deploy WordPress.
+I'm really glad you've made it this far. We still have a few steps until we achieve a basic production grade concept to deploy WordPress.
 
-In this chapter we are going into the details of versions of services used,
-that are ideal for WordPress and MariaDB containers.
+In this chapter we are going into the details of versions of services used, that are ideal for WordPress and MariaDB containers.
 
-MicroK8s is a Kubernetes distribution intended to self upgrade, and so
-long as external addons are kept to a minimum, maintenance of it is
-minimal.
+MicroK8s is a Kubernetes distribution intended to self upgrade, and so long as external addons are kept to a minimum, maintenance of it is minimal.
 
-Normally we must take care of the operating system updates, and I will
-show you some tricks for automating upgrades and scheduling safe restarts if
-needed.
+Normally we must take care of the operating system updates, and I will show you some tricks for automating upgrades and scheduling safe restarts if needed.
 
-Our discussed extra addon until now, **cert-manager**, can be upgraded,
-by applying the main remote configuration on each new tag, and there are a
-number of ways to stay up to date on tags, like subscribing on Github to
-be notified of each new release of the project.
+Our discussed extra addon until now, **cert-manager**, can be upgraded, by applying the main remote configuration on each new tag, and there are a number of ways to stay up to date on tags, like subscribing on Github to be notified of each new release of the project.
 
 image:images/how-to-subscribe-to-release-notifications.png[How to subscribe to release notifications]
 
@@ -26,51 +17,45 @@ But let's start with our **WordPress** services management.
 
 === Locking container versions
 
-I'll bring back the full recipe of a WordPress website
-and we will *talk* about each important part of it.
+I'll bring back the full recipe of a WordPress website and we will *talk* about each important part of it.
 
-.https://j.mp/3q0UdLp[kustomization.yml]
+.https://gist.github.com/madalinignisca/93339ec774b00bc5589b3a45fc968eb5#file-kustomization-yaml[kustomization.yml]
 [source,yaml,linenums]
 ----
 ---
 secretGenerator:
-# Saving the password in clear text
-# must not be done for public, production facing
-# websites.
-- name: mysql-pass
+- name: mysql-root-pass
   literals:
   - password=password123
+- name: mysql-user
+  literals:
+  - user=wordpress
+- name: mysql-pass
+  literals:
+  - password=wordpress
+- name: mysql-database
+  literals:
+  - database=wordpress
 resources:
-  - mysql-statefulset.yaml
-  - wordpress-statefulset.yaml
+  - mysql.yaml
+  - wordpress.yaml
 ----
 
 This is our start, our Kustomization file.
 
-We don't have any mention about a service version in it, but there is one critical
-thing. **We stored a clear text password in it!** We must not ever do this for
-production with public facing websites. It was simply easy to use as an example for a
-private experiment briefly that should be removed afterwards!
+We don't have any mention about a service version in it, but there is one critical thing. **We stored a clear text password in it!** We must not ever do this for production with public facing websites. It was simply easy to use as an example for a private experiment briefly that should be removed afterwards!
 
-What would be best practice when handling secrets for our websites? There are lots
-of options and opinions on how to do this. Personally, I take an easy approach.
+What would be best practice when handling secrets for our websites? There are lots of options and opinions on how to do this. Personally, I take an easy approach.
 
-I use a passwords application to save them. I use https://keepass.info[KeePass]
-and any similar, cloud based solution should be fine also.
+I use a passwords application to save them. I use https://keepass.info[KeePass] and any similar, cloud based solution should be fine also.
 
-Once I've created a new strong password, I'll save it in an organized fashion. In the case of
-KeePass, I use a dedicated database file for projects, so I create the secret with the password
-using `kubectl`.
+Once I've created a new strong password, I'll save it in an organized fashion. In the case of KeePass, I use a dedicated database file for projects, so I create the secret with the password using `kubectl`.
 
-Let's create a configuration template and a bash script to automate the creation
-and update of a secret. You will be able to reuse this anytime you
-want to create a new secret or update an existing one. Make a new directory
-to store these files.
+Let's create a configuration template and a bash script to automate the creation and update of a secret. You will be able to reuse this anytime you want to create a new secret or update an existing one. Make a new directory to store these files.
 
-We will also extend our secret to set a custom user name and password for best
-security practices, and avoid using root user to connect to the database.
+We will also extend our secret to set a custom user name and password for best security practices, and avoid using root user to connect to the database.
 
-.safe-password-manager.yml.tmpl
+.safe-password-manager.yaml.tmpl
 [source,yaml,linenums]
 ----
 ---
@@ -105,16 +90,14 @@ read -p USER_PASSWORD
 echo -e "\n"
 
 sed "s/SECRET_NAME/$SECRET_NAME/g" \
-  safe-password-manager.yml.tmpl | \
+  safe-password-manager.yaml.tmpl | \
   sed "s/ROOT_PASSWORD/`echo $ROOT_PASSWORD|base64`/g" - | \
   sed "s/USER_NAME/`echo $USER_NAME|base64`/g" - | \
   sed "s/USER_PASSWORD/`echo $USER_PASSWORD|base64`/g" - | \
   microk8s.kubectl apply -f -
 ----
 
-To create a new password now, just run:
-`bash safe-password-manager.sh`
-enter the secret name and after the password.
+To create a new password now, just run: `bash safe-password-manager.sh` enter the secret name and after the password.
 
 The output should look like:
 
@@ -129,7 +112,7 @@ secret/new-secret-password created
 
 Next, let's go through the MariaDB service.
 
-.https://j.mp/3cRFHSq[mysql-statefulset.yml]
+.https://gist.github.com/madalinignisca/93339ec774b00bc5589b3a45fc968eb5#file-mysql-yaml[mysql-statefulset.yml]
 [source,yaml,linenums]
 ----
 ---
@@ -166,14 +149,31 @@ spec:
         tier: mysql
     spec:
       containers:
-      - image: mariadb:10.5
+      - image: mariadb:10.6
         name: mysql
         env:
-        - name: MYSQL_ROOT_PASSWORD
+        - name: MARIADB_ROOT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: mysql-root-pass
+              key: password
+        - name: MARIADB_DATABASE
+          valueFrom:
+            secretKeyRef:
+              name: mysql-database
+              key: database
+        - name: MARIADB_USER
+          valueFrom:
+            secretKeyRef:
+              name: mysql-user
+              key: user
+        - name: MARIADB_PASSWORD
           valueFrom:
             secretKeyRef:
               name: mysql-pass
               key: password
+        - name: MARIADB_AUTO_UPGRADE
+          value: "true"
         ports:
         - containerPort: 3306
           name: mysql
@@ -192,60 +192,30 @@ spec:
 
 We have created MariaDB as a **Stateful** service.
 
-Kubernetes defines a list of
-https://kubernetes.io/docs/concepts/workloads/controllers/[**Workload Resources**]
-which include the above **StatefulSet** used by me. Running MariaDB or any other
-database, requires that each instance has a particular configuration if
-high availability is desired for databases, and the storage is dedicated to
-one single instance running. On the opposite side, is the **ReplicaSet**, which prefer
-to be configured using **Deployments** and are intended to be used in configurations
-where multiple replicas need to be started. **High Availability**, which We will detail
-in the next chapter, requires us to move from the classic WordPress usage that
-allows Core, Plugins, Themes, and uploads to be used on a volume, towards ReplicaSets,
-which allows us to start as many replicas of WordPress containers that we make available,
-within the limit of hardware resources.
+Kubernetes defines a list of https://kubernetes.io/docs/concepts/workloads/controllers/[**Workload Resources**] which include the above **StatefulSet** used by me. Running MariaDB or any other database, requires that each instance has a particular configuration if high availability is desired for databases, and the storage is dedicated to one single instance running.
 
-To lock the MariaDB version we are using, we only need to set the desired value
-in `- image: mariadb:10.5`. MariaDB uses a 3 number versioning scheme, popular
-among open source software, usually named https://semver.org/[Semantic Versioning],
-which defines for `X.Y.Z`:
+To lock the MariaDB version we are using, we only need to set the desired value in `- image: mariadb:10.6`. MariaDB uses a 3 number versioning scheme, popular among open source software, usually named https://semver.org/[Semantic Versioning], which defines for `X.Y.Z`:
 
-* **X** is the MAJOR, very critical number, and a project might not be able
-  to change from it easy.
-* **Y** is the MINOR, number which indicates that new features have been
-  added, possibly performance enhancements.
-* **Z** is the PATCH, the most important number you should care about for the
-  database of a WordPress database. This number means that critical security or
-  bug fixes have been made and you should upgrade as soon as possible.
+* **X** is the MAJOR, very critical number, and a project might not be able to change from it easy.
+* **Y** is the MINOR, number which indicates that new features have been added, possibly performance enhancements.
+* **Z** is the PATCH, the most important number you should care about for the database of a WordPress database. This number means that critical security or bug fixes have been made and you should upgrade as soon as possible.
 
-I do not recommend upgrading a MAJOR for MariaDB or MySQL on an existing
-WordPress website just for the bravery of stating you have upgraded. Stick to the
-current recommended MAJOR for the WordPress version you are using until the
-community is stating for a few good months that it is all working fine on a new
-MAJOR.
+I do not recommend upgrading a MAJOR for MariaDB or MySQL on an existing WordPress website just for the bravery of stating you have upgraded. Stick to the current recommended MAJOR for the WordPress version you are using until the community is stating for a few good months that it is all working fine on a new MAJOR.
 
 At the time of writing this book WordPress requirements where:
 
-* PHP 7.4 or higher, core runs perfectly on 8.0 (visibly faster), but many plugins and themes
-  are still not guaranteed to run on 8.x.
-* MySQL 5.6 or MariaDB 10.1 or recent. This means MySQL 5.7 and any MariaDB 10.x
-  included. It is possible that it will work fine with MySQL 8.0 also.
+* PHP 7.4 or higher, core runs on 8.0, but many plugins and themes are still not guaranteed to run on 8.x. Stay informed from https://make.wordpress.org/core/[WordPress Developers Blog] for changes.
+* MySQL 5.6 or MariaDB 10.1 or recent. This means MySQL 5.7 and any MariaDB 10.x included. It is possible that it will work fine with MySQL 8.0 also. I would stick to long term supported MariaDB versions, 10.6 at current book revision.
 
 So, how can we ensure we use the latest version without getting issues?
 
 Our database stores it's data in a volume we have defined in the above recipe.
 
-I do it this way, and it would be the way I recommend doing it: make a database backup.
-Avoid using a plugin based backup solution for database and use the command line
-if you are confident or add a service like Adminer.
+I do it this way, and it would be the way I recommend doing it: make a database backup. Avoid using a plugin based backup solution for database and use the command line if you are confident or add a service like Adminer.
 
 **Method 1: command line.**
 
-Let's write a small script to backup a database. You will be able to use it for
-all WordPress websites you would host with MicroK8s, but not only WordPress,
-any MySQL/MariaDB based website. We need the mysql/mariadb client installed locally, and
-as we use Ubuntu as our host operating system, we can have it installed just by
-running: `sudo apt update && sudo apt install -y mariadb-client`.
+Let's write a small script to backup a database. You will be able to use it for all WordPress websites you would host with MicroK8s, but not only WordPress, any MySQL/MariaDB based website. We need the mysql/mariadb client installed locally, and as we use Ubuntu as our host operating system, we can have it installed just by running: `sudo apt update && sudo apt install -y mariadb-client`.
 
 .databasebackup.sh
 [source,bash,linenums]
@@ -264,37 +234,21 @@ read DATABASE
 mysqldump -h$HOSTNAME -u$USERNAME -p $DATABASE > $DATABASE-`date +"%s"`.sql
 ----
 
-To get the HOSTNAME, run `microk8s.kubectl get service wpk8s-club-demo-mysql`
-and it is the value under **CLUSTER-IP**. Replace `wpk8s-club-demo-mysql` with
-the service name you set for the website.
+To get the HOSTNAME, run `microk8s.kubectl get service wpk8s-club-demo-mysql` and it is the value under **CLUSTER-IP**. Replace `wpk8s-club-demo-mysql` with the service name you set for the website.
 
-If you have not saved your password (please try to save passwords in a
-personal vault, for example KeePass), you can obtain it from the saved secrets:
-`microk8s.kubectl get secrets | grep wpk8s-club-demo-mysql-pass`
-to identify secret name with it's possible added hash;
-`microk8s.kubectl get secret wpk8s-club-demo-mysql-pass-REPLACEHASH -ojson | jq -r ".data.password" | base64 --decode`.
-Do not forget to replace `wpk8s-club-demo-mysql*` with what you used.
+If you have not saved your password (please try to save passwords in a personal vault, for example KeePass), you can obtain it from the saved secrets: `microk8s.kubectl get secrets | grep wpk8s-club-demo-mysql-pass` to identify secret name with it's possible added hash; `microk8s.kubectl get secret wpk8s-club-demo-mysql-pass-REPLACEHASH -ojson | jq -r ".data.password" | base64 --decode`. Do not forget to replace `wpk8s-club-demo-mysql*` with what you used.
 
-Now you can run the script: `bash databasebackup.sh`. The sql dump will be named
-using the database and current timestamp suffixed to it. You can copy or move it
-to a safe place.
+Now you can run the script: `bash databasebackup.sh`. The sql dump will be named using the database and current timestamp suffixed to it. You can copy or move it to a safe place.
 
-You might be concerned that this is a way to read passwords, but do not worry,
-this is strictly limited to people with access and permissions to manage
-MicroK8s and use kubectl in the nodes of your cluster. The only issues might be
-when untrustworthy people have access to the servers with MicroK8s, but that brings
-the question: *"would you allow an untrustworthy person into your house?"*.
+You might be concerned that this is a way to read passwords, but do not worry, this is strictly limited to people with access and permissions to manage MicroK8s and use kubectl in the nodes of your cluster. The only issues might be when untrustworthy people have access to the servers with MicroK8s, but that brings the question: *"would you allow an untrustworthy person into your house?"*.
 
 **Method 2: add Adminer.**
 
-Alternatively we can add a database management script, which might help you for
-other needs as well, especially if you are used to shared hosting where you
-had easy access to phpMyAdmin.
+Alternatively we can add a database management script, which might help you for other needs as well, especially if you are used to shared hosting where you had easy access to phpMyAdmin.
 
 TIP: You can use phpMyAdmin as an alternative to Adminer if you are more comfortable with it.
 
-In the same directory as our demo website's recipe, let's create an additional
-yaml file, containing the deployment and service configuration for Adminer.
+In the same directory as our demo website's recipe, let's create an additional yaml file, containing the deployment and service configuration for Adminer.
 
 Replace `wpk8s-club-demo` with the name you used in the rest of configurations.
 
@@ -343,8 +297,7 @@ spec:
         - containerPort: 8080
 ----
 
-Next, we will extract the **Ingress** configuration from `wordpress-statefulset.yml`,
-and extend it
+Next, we will extract the **Ingress** configuration from `wordpress.yaml`, and extend it
 
 .ingress.yml
 [source,yaml,linenums]
@@ -386,16 +339,11 @@ spec:
                 number: 8080
 ----
 
-We added to it just the new `/adminer` path, pointing at the new
-Adminer service we dedicated for this website.
+We added to it just the new `/adminer` path, pointing at the new Adminer service we dedicated for this website.
 
-NOTE: In a cluster, you could actually dedicate an Adminer or phpMyAdmin
-instance, on a domain/subdomain of choice, to support all hosted databases.
-Alternatively, to separate databases, like for common websites with less sensitive
-data, you could even use one common database service. We will look into this
-later, in a section related to saving resources to lower costs.
+NOTE: In a cluster, you could actually dedicate an Adminer or phpMyAdmin instance, on a domain/subdomain of choice, to support all hosted databases. Alternatively, to separate databases, like for common websites with less sensitive data, you could even use one common database service. We will look into this later, in a section related to saving resources to lower costs.
 
-Edit `kustomization.yml` and add Adminer and the new Ingress configuration.
+Edit `kustomization.yaml` and add Adminer and the new Ingress configuration.
 
 .kustomization.yml
 [source,yaml,linenums]
@@ -408,130 +356,38 @@ resources:
   - ingress.yml
 ----
 
-NOTE: It is best to keep the list order exactly the same as the order they would need to be applied,
-as it will help you understand it better when you have to customize later. Also,
-I removed the password entry, which now should have been added like described
-at the beginning of the chapter.
+NOTE: It is best to keep the list order exactly the same as the order they would need to be applied, as it will help you understand it better when you have to customize later. Also, I removed the password entry, which now should have been added like described at the beginning of the chapter.
 
-Apply all new changes by running:
-`microk8s.kubectl apply -k ./`
+Apply all new changes by running: `microk8s.kubectl apply -k ./`
 
-In your browser, open the website url and add `/adminer` at the end. Fill in the
-user, password and hostname, in case it was not pre-filled, and start using
-Adminer to backup, restore and alter the data.
+In your browser, open the website url and add `/adminer` at the end. Fill in the user, password and hostname, in case it was not pre-filled, and start using Adminer to backup, restore and alter the data.
 
 Securing this path could be done in a number of different ways.
 
-* Nginx Ingress annotations to add user and password on the `/adminer` path.
-I use this on shared Adminer services in a cluster.
+* Nginx Ingress annotations to add user and password on the `/adminer` path. I use this on shared Adminer services in a cluster.
 
-* Comment the Adminer entry in the Ingress configuration and apply. It will
-not serve from the Adminer backend service. It's easy and safe.
+* Comment the Adminer entry in the Ingress configuration and apply. It will not serve from the Adminer backend service. It's easy and safe.
 
-* Set replicas to 0 on the Adminer service.
+* Set replicas to 0 on the Adminer service. Change to 1 for the time you want to use.
 
-I think I have diverted a lot from versioning, by showing you how to backup the
-database, I did not touch the WordPress files and the uploads as in the current
-configuration we have used, you are still able to use classic, in WordPress,
-plugins to do that. Remember, your WordPress installation and your uploads are
-in a volume, and up until now we have used the builtin Storage add-on, you can find
-all files in
-`/var/snap/microk8s/common/default-storage/[extended-name-of-defined-volume`].
-So, I would either make a full copy of the directory, using
-`cp -r /var/snap/microk8s/common/default-storage/[extended-name-of-defined-volume`] filesbackup`
-or archive them if storage is constrained
-`tar czfv filesbackup.tar.gz /var/snap/microk8s/common/default-storage/[extended-name-of-defined-volume`]`.
+I think I have diverted a lot from versioning, by showing you how to backup the database, I did not touch the WordPress files and the uploads as in the current configuration we have used, you are still able to use classic, in WordPress, plugins to do that. Remember, your WordPress installation and your uploads are in a volume, and up until now we have used the builtin Storage add-on, you can find all files in `/var/snap/microk8s/common/default-storage/[extended-name-of-defined-volume`].
 
-IMPORTANT: Avoid using ZIP to archive web projects, unless you really know what permissions
-need to be set on files.
+So, I would either make a full copy of the directory, using `cp -r /var/snap/microk8s/common/default-storage/[extended-name-of-defined-volume`] filesbackup` or archive them if storage is constrained `tar czfv filesbackup.tar.gz /var/snap/microk8s/common/default-storage/[extended-name-of-defined-volume`]`.
 
-As you are controlling the host of the cluster, you could even install Midnight Commander
-to have a **TUI** application with a familiar interface to manage files.
-`sudo apt install -y mc` will get it installed for you. Run `sudo mc` and enjoy. You need
-root access to be able to access volumes files and make sure you don't alter permissions
-or ownership of files and directories, **mc** has the option when copying or moving
-to preserve file attributes.
+IMPORTANT: Avoid using ZIP to archive web projects, unless you really know what permissions need to be set on files.
+
+As you are controlling the host of the cluster, you could even install Midnight Commander to have a **TUI** application with a familiar interface to manage files. `sudo apt install -y mc` will get it installed for you. Run `sudo mc` and enjoy. You need root access to be able to access volumes files and make sure you don't alter permissions or ownership of files and directories, **mc** has the option when copying or moving to preserve file attributes.
 
 Let's go back to versioning.
 
-In our `wordpress-statefulset.yml` we have defined `- image: wpk8s/wordpress:5.6.1`.
-When a new image is available, all you need to do is change the version and
-apply. Yes, it's really that simple. But with this way of using WordPress, what is
-upgraded is actually Apache HTTPD and PHP versions. The official WordPress container
-image on https://hub.docker.com[Docker Hub] comes with an init script that downloads
-the WordPress version on the selected tag, puts files in the declared volume and
-from that moment, WordPress is in control, just like you used it in shared hosting.
-You are fine to set auto-updates for WordPress, for plugins and for themes the way you
-were used to doing. An alternative, required for High Availability that forces
-a locked WordPress installation will be detailed in next chapter.
+In our `wordpress.yaml` we have defined `- image: wpk8s/wordpress:5.6.1`. When a new image is available, all you need to do is change the version and apply. Yes, it's really that simple. But with this way of using WordPress, what is upgraded is actually Apache HTTPD and PHP versions. The official WordPress container image on https://hub.docker.com[Docker Hub] comes with an init script that downloads the WordPress version on the selected tag, puts files in the declared volume and from that moment, WordPress is in control, just like you used it in shared hosting. You are fine to set auto-updates for WordPress, for plugins and for themes the way you were used to doing. An alternative, required for High Availability that forces a locked WordPress installation will be detailed in next chapter.
 
-To experiment, change the version and apply:
-`microk8s.kubectl apply -k ./` or
-`microk8s.kubectl apply -f wordpress-statefulset.yml` will only update the
-configuration defined in it.
+To experiment, change the version and apply: `microk8s.kubectl apply -k ./` or `microk8s.kubectl apply -f wordpress.yaml` will only update the configuration defined in it.
 
 We can do this for MariaDB or MySQL service as well.
 
-Let's make one single change in the `mysql-statefulset.yml` configuration, to support
-upgrades. We must use the https://mariadb.com/kb/en/mysql_upgrade/[MySQL Upgrade] script.
-We will run the script in the `postStart` option of the
-https://kubernetes.io/docs/concepts/containers/container-lifecycle-hooks[lifecycle definition].
+So, we've been through setting exact service versions, and we looked into how to handle upgrades. We discovered how to backup the database and we also discovered where our WordPress files are stored in the default Storage add-on.
 
-The containers section in the `mysql-statefulset.yml` configuration file needs to be
-changed to something like the following example (make sure you use the names for your services,
-replacing `wpk8s-club-demo` with what you used).
-
-.mysql-statefulset.yml
-[source,yaml,linenums]
-----
-#...
-      containers:
-      - image: mariadb:10.5.9
-        name: mysql
-        env:
-        - name: MYSQL_ROOT_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: wpk8s-club-demo-mysql-pass
-              key: password
-        ports:
-        - containerPort: 3306
-          name: mysql
-        volumeMounts:
-        - name: wpk8s-club-demo-mysql
-          mountPath: /var/lib/mysql
-        lifecycle:
-          postStart:
-            exec:
-              command: ["/bin/sh", "-c", "sleep 15; mysql_upgrade"]
-#...
-----
-
-We upgraded MariaDB from 10.5.8 to 10.5.9 and we added the postStart hook
-in the lifecycle entry. The `sleep 15` will allow the service to really start.
-The postStart hook runs asynchronous to the containers entrypoint, so MariaDB or
-MySQL might not be ready to accept connections yet. Sleep will grant a decent
-amount of time for it to be ready and as the years have proved, the mysql_upgrade
-script will do it's job almost all the time. I do say almost, as this is why
-I insisted on making Backups. In any case of a failure, you can revert the
-version and restore the database.
-
-NOTE: Only add the postStart lifecycle hook after the database service has
-been started at least once. It is safe to add it after you initiated the
-WordPress website. Just to not run it concurrently as the database is initiated
-for the first time.
-
-Make sure you made the database backup! Apply:
-`microk8s.kubectl apply -k ./` or
-`microk8s.kubectl apply -f mysql-statefulset.yml`
-
-So, we've been through setting exact service versions, and we looked into
-how to handle upgrades. We discovered how to backup the database and we also
-discovered where our WordPress files are stored in the default Storage add-on.
-
-It is time now, to discover how to handle high availability mode, with
-multiple cluster nodes, aka multiple virtual cloud instances. It will force us
-to set up a more complex storage solution, make the database service able
-to move from node to node and the same for WordPress.
+It is time now, to discover how to handle high availability mode, with multiple cluster nodes, aka multiple virtual cloud instances. It will force us to set up a more complex storage solution, make the database service able to move from node to node and the same for WordPress.
 
 Also... it's fun, right?
