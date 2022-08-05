@@ -39,7 +39,7 @@ include::ch07-high-availability.adoc[]
 
 include::ch08-backup-solutions.adoc[]
 
-include::ch09-locking-code-version.adoc[]
+include::ch09-improving-performance.adoc[]
 
 include::ch10-monitor-observe-alerts.adoc[]
 

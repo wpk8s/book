@@ -23,12 +23,12 @@ https://multipass.run[**Multipass**] is an application that runs on Windows, Mac
 
 http://j.mp/2NqWSzu[**Visual Studio Code**] is one of the few code editors and light integrated development environments capable of handling remote or containerized projects. While all things in this book could be done with other code editors, especially everything from the command line, I will use it for the benefit of beginners to help them learn faster.
 
+==== Github
+
+https://github.com[**Github**] will be my choice to keep a repository for my cluster's manifests and other provisioning code. By getting a good understanding of everything, with it you can even recover from a complete failure, even with data if that can be automated on first init of a resource with a backup available where is expected.
+
 === Cloud Providers
 
 ==== Hetzner
 
 I will use https://bit.ly/3cLf8hH[**Hetzner**] to exemplify things on real cloud servers. As using real online instances involves a cost, I have chosen one of the cheapest that is still very reliable as a public cloud provider. Although it does not offer many managed services compared to others, my goal in this book is to teach you how to do things without being locked into a public cloud vendor, to be able to move the very next day if such a decision need be taken.
-
-==== Digital Ocean
-
-I will use http://j.mp/3b2Am8u[**Digital Ocean**] as the secondary public cloud provider to demonstrate migrating from your first provider used to another one. In the past decade I have occasionally worked on migration projects, where their main problem was some of the managed services used by the projects. In the migration chapter, we will learn how to handle migration of data by automation, with a scenario that can be replicated anytime.
